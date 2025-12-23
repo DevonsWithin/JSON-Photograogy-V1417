@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Photo Station V15.5 - Merged Edition</title>
+    <style>
+        :root { --bg: #0b0e14; --card: #161b22; --input: #0d1117; --text: #c9d1d9; --secondary: #58a6ff; --accent: #ff7b72; --success: #238636; --warning: #d29922; --tab-active: #1f6feb; }
+        body { font-family: "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); padding: 20px; max-width: 1200px; margin: 0 auto; line-height: 1.5; }
+        .section { background: var(--card); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #30363d; }
+        .row { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; align-items: flex-end; }
+        .col { flex: 1; min-width: 200px; }
+        label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 13px; color: #8b949e; }
+        select, input[type="text"], input[type="password"], input[type="number"], textarea { width: 100%; padding: 10px; background: var(--input); border: 1px solid #30363d; color: #fff; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        
+        .btn { padding: 12px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 14px; white-space: nowrap; }
+        .btn-gen { background: var(--success); color: white; width: 100%; }
+        .btn-api { background: var(--secondary); color: white; width: 100%; }
+        .btn-scan { background: var(--warning); color: #000; }
+        .btn-tool { background: #30363d; color: white; }
+        .btn-save { background: #238636; color: white; }
+        .btn-del { background: #da3633; color: white; }
+
+        .tab-header { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+        .tab-btn { background: #21262d; color: #8b949e; flex: 1; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; border: 1px solid transparent; font-weight: bold; }
+        .tab-btn.active { background: var(--tab-active); color: white; border-color: var(--secondary); }
+        .tab-btn:hover { background: #30363d; }
+        
+        .tab-content { display: none; animation: fadeIn 0.3s; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Sub Panels for V1550 Lighting/Theme */
+        .sub-panel { background: #0d1117; padding: 15px; border-radius: 8px; border-left: 3px solid var(--secondary); margin-top: 10px; display: none; }
+        .color-item { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 8px; }
+        .color-swatch { width: 18px; height: 18px; border-radius: 3px; border: 1px solid #8b949e; }
+
+        /* V14.5 Dynamic Lists & Effects */
+        .dynamic-item { background: #1c2128; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #30363d; position: relative; }
+        .btn-remove { position:absolute; right:10px; top:10px; background:none; border:none; color:var(--accent); cursor:pointer; font-weight:bold; }
+        
+        .preset-box { border: 1px dashed var(--secondary); padding: 15px; border-radius: 8px; margin-bottom: 15px; background: rgba(88, 166, 255, 0.1); }
+        .help-text { font-size: 12px; color: #8b949e; margin-top: 5px; line-height: 1.4; }
+        
+        /* V14.5 Effects Grid */
+        .effects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; margin-top: 10px; }
+        .effect-item { background: #21262d; padding: 8px; border-radius: 4px; display: flex; align-items: center; gap: 8px; font-size: 13px; border: 1px solid #30363d; cursor: pointer; }
+        .effect-item:hover { border-color: var(--secondary); }
+
+        pre { background: #010409; padding: 20px; border-radius: 8px; color: #7ee787; border: 1px solid #30363d; white-space: pre-wrap; font-family: 'Consolas', monospace; min-height: 150px; font-size: 13px; }
+        .status-dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; background: #8b949e; }
+        .status-ok { background: var(--success); box-shadow: 0 0 5px var(--success); }
+    </style>
+</head>
+<body onload="init()">
+
+    <div class="section" style="border: 1px solid var(--secondary);">
+        <label>🔑 API 金鑰管理 (Saved Keys)</label>
+        <div class="row">
+            <div class="col" style="flex:1;">
+                <select id="savedKeys" onchange="loadSelectedKey()">
+                    <option value="">-- 選擇已存的金鑰 --</option>
+                </select>
+            </div>
+            <div class="col" style="flex:2;">
+                <input type="password" id="apiKey" placeholder="輸入 Google AI Studio Key (AIza...)">
+            </div>
+            <div class="col" style="flex:1;">
+                <input type="text" id="keyName" placeholder="給這個 Key 一個名稱">
+            </div>
+            <div class="col" style="flex:0.5;">
+                <button class="btn btn-save" onclick="saveKey()">💾 儲存</button>
+            </div>
+            <div class="col" style="flex:0.5;">
+                <button class="btn btn-del" onclick="deleteKey()">🗑️ 刪除</button>
+            </div>
+        </div>
+        
+        <div class="row">
+             <div class="col" style="flex:0.8;">
+                 <button class="btn btn-scan" onclick="scanModels()">🔍 1. 掃描可用模型</button>
+            </div>
+            <div class="col" style="flex:1.5;">
+                <select id="apiModel"><option value="">請先掃描...</option></select>
+            </div>
+        </div>
+        <div id="statusMsg" style="font-size:12px; color:#8b949e; margin-top:5px;"><span class="status-dot" id="statusDot"></span> 就緒</div>
+    </div>
+
+    <div class="tab-header">
+        <div class="tab-btn active" onclick="switchTab('gen')" id="btn-gen">🎨 生圖模式 (Generate)</div>
+        <div class="tab-btn" onclick="switchTab('edit')" id="btn-edit">🛠️ 改圖模式 (Edit)</div>
+    </div>
+
+    <div id="tab-gen" class="tab-content active">
+        <div class="section">
+            <label style="color: var(--secondary);"><input type="checkbox" id="isPhotogenic" checked> ✨ Photogenic Mode (取景美學與肢體動態校正)</label>
+            <div class="row" style="margin-top:15px;">
+                <div class="col"><label>專案名稱</label><input type="text" id="pName" value="New_Project"></div>
+                <div class="col">
+                    <label>視覺風格</label>
+                    <select id="pStyle">
+                        <option value="Hyper-Realistic Portraiture (PBR)">超寫實人像 (PBR)</option>
+                        <option value="High-end Editorial Fashion Photography">高端雜誌 (Editorial)</option>
+                        <option value="Cinematic Movie Still">電影劇照 (Cinematic)</option>
+                        <option value="Candid Smartphone Photo">手機抓拍 (Smartphone)</option>
+                        <option value="Analog Film, Kodak Portra 400">底片質感 (Analog Film)</option>
+                        <option value="DSLR Raw Output, neutral color">數位單反直出 (DSLR Raw)</option>
+                        <option value="Film Noir aesthetic, high contrast monochrome">黑白電影感 (Noir)</option>
+                        <option value="Cinematic Warm-Gray tone, muted colors">暖灰電影感 (Cinematic Warm-Gray)</option>
+                    </select>
+                </div>
+            </div>
+       
+            <div class="row">
+                <div class="col"><label>主題描寫 (Subject)</label><input type="text" id="pSubject" placeholder="人物、外觀、狀態描述"></div>
+                <div class="col"><label>情境環境 (Context)</label><input type="text" id="pContext" placeholder="場景、環境、時間、氛圍"></div>
+            </div>
+
+            <div class="row">
+                <div class="col"><label>鏡頭視角 (Angle)</label>
+                    <select id="pAngle">
+                        <option value="Eye Level">平視 (Eye Level)</option>
+                        <option value="Low Angle">仰拍 (Low Angle)</option>
+                        <option value="High Angle">俯拍 (High Angle)</option>
+                        <option value="Side View">側面 (Side View)</option>
+                        <option value="Over The Shoulder">過肩鏡頭 (Over The Shoulder)</option>
+                        <option value="Dutch Angle">傾斜視角 (Dutch Angle)</option>
+                        <option value="Drone View">無人機視角 (Drone View)</option>
+                    </select>
+                </div>
+                <div class="col"><label>鏡頭景別 / 鏡頭</label>
+                    <select id="pShot" onchange="checkCloseup()">
+                        <option value="Full body shot / 35mm Wide">全身 (Full Body) / 35mm 廣角</option>
+                        <option value="Upper body shot (Half body) / 50mm Standard">半身 (Half Body) / 50mm 標準</option>
+                        <option value="Cowboy shot / 50mm Standard">七分身 (Cowboy Shot) / 50mm 標準</option>
+                        <option value="Close-up shot / 85mm Portrait">特寫 (Close-up) / 85mm 人像鏡</option>
+                        <option value="Extreme close-up / Macro">極致特寫 (Extreme CU) / 微距鏡</option>
+                    </select>
+                </div>
+                <div class="col" id="closeupBox" style="display:none;"><label style="color:var(--accent)">特寫部位 (Focus Area)</label>
+                    <select id="pCloseupOther" onchange="document.getElementById('customFocus').style.display = (this.value==='Custom')?'block':'none';">
+                        <option value="Eyes">眼睛 (Eyes)</option>
+                        <option value="Lips">嘴唇 (Lips)</option>
+                        <option value="Face details">臉部細節 (Skin / Texture)</option>
+                        <option value="Hands">手部 (Hands)</option>
+                        <option value="Jewelry / Accessories">飾品 / 配件</option>
+                        <option value="Fabric texture">布料紋理 (Fabric)</option>
+                        <option value="Sweat / Skin pores">汗水 / 毛孔細節</option>
+                        <option value="Custom">自訂描述…</option>
+                    </select>
+                    <input type="text" id="customFocus" style="display:none; margin-top:8px;" placeholder="請輸入自訂特寫部位描述">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <label>光線設定 (Lighting)</label>
+                    <select id="pLight" onchange="updateLightPanel()">
+                        <option value="">-- 未指定 --</option>
+                        </select>
+                    <div id="lightPanel" class="sub-panel">
+                        <div class="row">
+                            <div class="col"><label>角度</label><input type="text" id="lAngle"></div>
+                            <div class="col"><label>寬度</label><input type="text" id="lWidth"></div>
+                            <div class="col"><label>對比度</label><select id="lContrast"></select></div>
+                        </div>
+                        <div class="col" style="margin-top:10px;"><label>主體落點 (Target Area)</label>
+                            <select id="lTarget">
+                                <option value="Unspecified">未指定</option>
+                                <option value="Across eyes and bridge of nose">眼鼻部</option>
+                                <option value="Side of face and neck">側臉與頸部</option>
+                                <option value="Behind head">腦後背景</option>
+                                <option value="Evenly on face">全臉均勻覆蓋</option>
+                                <option value="Shoulders and chest">肩膀與胸口</option>
+                                <option value="Center of face">臉部中心</option>
+                                <option value="Background behind head">背景：頭部後方</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <label>主題色彩</label>
+                    <select id="pTheme" onchange="updateThemePanel()">
+                        <option value="">-- 未指定 --</option>
+                        <option value="Noir">午夜電影 (Noir)</option>
+                        <option value="Executive">商務精英 (Executive)</option>
+                        <option value="Modern Tech">都會科技 (Modern Tech)</option>
+                        <option value="Vintage Film">復古膠捲 (Vintage Film)</option>
+                        <option value="Prism">虹光折射 (Prism)</option>
+                        <option value="Custom">自指定...</option>
+                    </select>
+                    <div id="themePanel" class="sub-panel">
+                        <div class="color-item"><div id="swatch-h" class="color-swatch"></div> <label style="width:60px;">主色(亮)</label><input type="text" id="tHighlight" oninput="syncSwatch('h')"></div>
+                        <div class="color-item"><div id="swatch-s" class="color-swatch"></div> <label style="width:60px;">次色(暗)</label><input type="text" id="tShadow" oninput="syncSwatch('s')"></div>
+                        <div class="color-item"><div id="swatch-a" class="color-swatch"></div> <label style="width:60px;">強調色</label><input type="text" id="tAccent" oninput="syncSwatch('a')"></div>
+                        <label>色溫/調性</label>
+                        <select id="tTone">
+                            <option value="35° ~ 50° Warm">35° ~ 50° Warm</option>
+                            <option value="Neutral">Neutral</option>
+                            <option value="6500K Cool">6500K Cool</option>
+                            <option value="Low Saturation">Low Saturation</option>
+                            <option value="Dynamic">Dynamic</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" style="padding: 15px; margin-bottom: 15px; border-color: #30363d;">
+                <label>特殊效果 (Special Effects)</label>
+                <div class="effects-grid">
+                    <label class="effect-item" title="模擬真實光線在物體間的折射與反射，大幅增加真實感">
+                        <input type="checkbox" class="effect-check" value="Ray Tracing Reflections"> 
+                        光線追蹤反射 (Ray Tracing) <br><span style="font-size:11px; color:#8b949e; margin-left:5px;">(模擬真實物理反光與折射)</span>
+                    </label>
+                    <label class="effect-item"><input type="checkbox" class="effect-check" value="Realistic Sweat Sheen"> 真實汗水光澤 (Realistic Sweat Sheen)</label>
+                    <label class="effect-item"><input type="checkbox" class="effect-check" value="Subtle Film Grain (3%)"> 微顆粒感 (Subtle Film Grain 3%)</label>
+                    <label class="effect-item"><input type="checkbox" class="effect-check" value="Prism Flare"> 稜鏡光斑 (Prism Flare)</label>
+                    </div>
+                <div class="help-text" style="margin-top:5px; color:#58a6ff;">* 系統已預設：高階肌膚物理 (SSS)、8K 解析度、無磨皮處理。</div>
+            </div>
+
+            <div class="section" style="margin-bottom:0; padding-bottom:10px;">
+                <h3>多重參考圖矩陣</h3>
+                <div id="refList"></div>
+                <button class="btn btn-tool" onclick="addRef()">+ 新增參考圖</button>
+            </div>
+            
+             <div class="section" style="margin-top: 20px;">
+                <label>🚫 負面提示詞 (Negative)</label>
+                <textarea id="pNeg" style="height: 50px;">Modified jawline, Crow's feet, Aged skin, Smooth plastic skin, CGI, Cartoonish, Blurry face, Distorted anatomy.</textarea>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-edit" class="tab-content">
+        <div class="section">
+            <div class="row">
+                <div class="col"><label>改圖專案名稱</label><input type="text" id="eName" value="Edit_Project"></div>
+            </div>
+            
+            <div class="preset-box">
+                <label style="color:var(--secondary)">🤖 背景置換/空間重構精靈 (Spatial Logic Wizard)</label>
+                <div class="row">
+                     <div class="col" style="flex:0.2;">
+                        <input type="checkbox" id="useBgPreset" onchange="toggleBgPreset()" style="width:20px; height:20px;">
+                    </div>
+                    <div class="col" style="flex:2;">
+                        <input type="text" id="bgRefId" placeholder="參考圖ID (例如: Scene_Rome)" disabled>
+                    </div>
+                    <div class="col" style="flex:2;">
+                        <select id="bgLightOpt" disabled>
+                            <option value="Keep Original Lighting">保留原圖光線 (Keep Original Lighting)</option>
+                            <option value="Match Reference Lighting">匹配參考圖光線 (Match Reference Lighting)</option>
+                        </select>
+                    </div>
+                    </div>
+                <div class="help-text">* 勾選並填入ID後，<b>系統將在生成時自動注入</b>「人物保留」與「場景重構」邏輯，無需手動操作。</div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <label>整體改圖指令 (Instruction)</label>
+                    <textarea id="eInstruction" style="height: 80px;" placeholder="例如：清除主角前方的所有遮蔽物，並重新整理空間邏輯..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>具體修改項目 (Modifications)</h3>
+            <div id="modList"></div>
+            <button class="btn btn-tool" onclick="addModItem()">+ 新增修改項</button>
+        </div>
+
+        <div class="section">
+            <h3>空間邏輯 (Spatial Logic)</h3>
+            <div id="spatialList"></div>
+            <button class="btn btn-tool" onclick="addSpatialItem()">+ 新增空間邏輯</button>
+        </div>
+
+        <div class="section">
+            <label>🚫 改圖負面提示詞 (Negative Prompt)</label>
+            <textarea id="eNeg" style="height: 60px;">leaves covering man, cluttered composition, eye wrinkles, plastic skin</textarea>
+        </div>
+    </div>
+
+    <div class="row" style="margin-top:20px;">
+        <div class="col"><button class="btn btn-gen" onclick="generateLocal()">預覽本地 JSON</button></div>
+        <div class="col"><button class="btn btn-api" onclick="runAI()">2. 呼叫 Gemini 轉譯</button></div>
+    </div>
+
+    <pre id="output">等待指令...</pre>
+    
+    <div style="display:flex; gap:10px;">
+        <button class="btn btn-tool" onclick="copyText()">📋 複製</button>
+        <button class="btn btn-tool" onclick="saveFile()">💾 儲存</button>
+        <button class="btn btn-tool" onclick="document.getElementById('loadInput').click()">📂 讀取</button>
+        <input type="file" id="loadInput" class="hidden" style="display:none;" onchange="loadFile(event)">
+    </div>
+
+    <script>
+        let currentTab = 'gen';
+        
+        // --- Data Definitions (Modified V1550 Data) ---
+        const THEME_DATA = {
+            "Noir": { h: "#F8F4E3", s: "#111016", a: "#FFB000", t: "35° ~ 50° Warm" },
+            "Executive": { h: "#E3D5CA", s: "#1A1A1A", a: "#4B3621", t: "Neutral" },
+            "Modern Tech": { h: "#FFFFFF", s: "#001F3F", a: "#C0C0C0", t: "6500K Cool" },
+            "Vintage Film": { h: "#C3B091", s: "#2D5A27", a: "#D2691E", t: "Low Saturation" },
+            "Prism": { h: "#8E8E8E", s: "#000000", a: "#FF00FF", t: "Dynamic" }
+        };
+
+        const LIGHTING_DATA = {
+            "narrow_beam": {
+                name: "戲劇窄光 (Narrow Beam)",
+                default_angle: -28, default_width: "15%", contrast_ratio: "7:1",
+                default_target: "Unspecified", // Changed from V1550
+                description: "橫跨眼部的極窄光條，營造神祕感"
+            },
+            "diagonal_sun": {
+                name: "強烈斜射窗光 (Diagonal Sun)",
+                default_angle: -45, default_width: "20%", contrast_ratio: "5:1",
+                default_target: "Unspecified", // Changed from V1550
+                description: "模擬強烈陽光透過窗戶的條狀陰影"
+            },
+            "circular_backlight": {
+                name: "環狀背光 (Circular Light)",
+                default_angle: 0, default_width: "50%", contrast_ratio: "8:1",
+                default_target: "Unspecified", // Changed from V1550
+                description: "背景出現大圓形光斑，勾勒輪廓"
+            },
+            "geometric_skylight": {
+                name: "幾何天窗投影 (Geometric)",
+                default_angle: 75, default_width: "30%", contrast_ratio: "6:1",
+                default_target: "Unspecified", // Changed from V1550
+                description: "方格或塊狀光影，具備工業/科技感"
+            },
+            "harsh_flash": {
+                name: "直接硬閃光 (Harsh Flash)",
+                default_angle: 0, default_width: "100%", contrast_ratio: "9:1",
+                default_target: "Unspecified", // Changed from V1550
+                description: "正面強光，強調皮膚紋理與寫實度"
+            },
+            "soft_directional": {
+                name: "柔和定向光 (Soft Directional)",
+                default_angle: 45, default_width: "60%", contrast_ratio: "2:1",
+                default_target: "Unspecified", // Changed from V1550
+                description: "平滑的自然光，氣氛溫暖舒適"
+            },
+            "golden_hour": {
+                name: "黃金時刻 (Golden Hour)",
+                default_angle: null, default_width: null, contrast_ratio: null,
+                default_target: "Side of face and hair", // Kept specific
+                description: "自然環境夕陽光"
+            }
+        };
+
+        // --- Init ---
+        function init() {
+            refreshKeyList();
+            populateLightingOptions();
+            if(document.getElementById('refList').children.length === 0) addRef("man_face", "Main Identity", 1.0, "25");
+            if(document.getElementById('modList').children.length === 0) addModItem("skin_texture", "Remove wrinkles around eyes...");
+        }
+
+        // --- Tab Logic ---
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('btn-' + tab).classList.add('active');
+            document.getElementById('tab-' + tab).classList.add('active');
+        }
+
+        // --- API & Model Logic (From V14.5) ---
+        function refreshKeyList() {
+            const saved = JSON.parse(localStorage.getItem('v14_api_keys') || '{}');
+            const select = document.getElementById('savedKeys');
+            select.innerHTML = '<option value="">-- 選擇已存的金鑰 --</option>';
+            for(let name in saved) {
+                const opt = document.createElement('option');
+                opt.value = saved[name];
+                opt.text = name;
+                select.appendChild(opt);
+            }
+        }
+
+        function saveKey() {
+            const key = document.getElementById('apiKey').value.trim();
+            const name = document.getElementById('keyName').value.trim();
+            if(!key || !name) return alert('請輸入 Key 和名稱');
+            const saved = JSON.parse(localStorage.getItem('v14_api_keys') || '{}');
+            saved[name] = key;
+            localStorage.setItem('v14_api_keys', JSON.stringify(saved));
+            refreshKeyList();
+            alert(`已儲存: ${name}`);
+        }
+
+        function loadSelectedKey() {
+            const key = document.getElementById('savedKeys').value;
+            if(key) document.getElementById('apiKey').value = key;
+        }
+
+        function deleteKey() {
+            const select = document.getElementById('savedKeys');
+            const name = select.options[select.selectedIndex].text;
+            if(!select.value) return;
+            if(confirm(`確定刪除 ${name} 嗎？`)) {
+                const saved = JSON.parse(localStorage.getItem('v14_api_keys') || '{}');
+                delete saved[name];
+                localStorage.setItem('v14_api_keys', JSON.stringify(saved));
+                refreshKeyList();
+                document.getElementById('apiKey').value = '';
+            }
+        }
+
+        async function scanModels() {
+            const key = document.getElementById('apiKey').value.trim();
+            if(!key) return alert('請輸入 Key');
+            const select = document.getElementById('apiModel');
+            select.innerHTML = '<option>掃描中...</option>';
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+                const data = await res.json();
+                select.innerHTML = '';
+                if(data.models) {
+                    data.models.filter(m => m.supportedGenerationMethods.includes("generateContent")).forEach(m => {
+                        const name = m.name.replace('models/', '');
+                        select.add(new Option(name, name));
+                    });
+                    document.getElementById('statusDot').className = 'status-dot status-ok';
+                    document.getElementById('statusMsg').innerHTML = '<span class="status-dot status-ok"></span> 模型已就緒';
+                } else { throw new Error("No models"); }
+            } catch (e) { alert('掃描失敗'); select.innerHTML = '<option value="">掃描失敗</option>'; }
+        }
+
+        // --- Lighting & Theme Logic (Modified V1550) ---
+        function populateLightingOptions() {
+            const sel = document.getElementById('pLight');
+            sel.innerHTML = '<option value="">-- 未指定 --</option>';
+            for (const key in LIGHTING_DATA) {
+                const opt = document.createElement('option');
+                opt.value = key; opt.text = LIGHTING_DATA[key].name; sel.appendChild(opt);
+            }
+        }
+
+        function updateLightPanel() {
+            const key = document.getElementById('pLight').value;
+            const panel = document.getElementById('lightPanel');
+            panel.style.display = key ? 'block' : 'none';
+            if(!key) return;
+            const cfg = LIGHTING_DATA[key];
+            
+            const angleInput = document.getElementById('lAngle');
+            const widthInput = document.getElementById('lWidth');
+            const contrastSel = document.getElementById('lContrast');
+            const targetSel = document.getElementById('lTarget');
+
+            // Angle & Width
+            if (cfg.default_angle === null && cfg.default_width === null) {
+                angleInput.value = ''; widthInput.value = '';
+                angleInput.placeholder = '— 不適用 —'; widthInput.placeholder = '— 不適用 —';
+                angleInput.disabled = true; widthInput.disabled = true;
+            } else {
+                angleInput.disabled = false; widthInput.disabled = false;
+                angleInput.placeholder = ''; widthInput.placeholder = '';
+                angleInput.value = cfg.default_angle;
+                widthInput.value = cfg.default_width;
+            }
+
+            // Contrast - Populate and Set
+            const contrastOptions = [
+                { v: "2:1", label: "2:1（柔和）" }, { v: "5:1", label: "5:1（高反差）" },
+                { v: "6:1", label: "6:1（硬光）" }, { v: "7:1", label: "7:1（極高）" },
+                { v: "8:1", label: "8:1（背光）" }, { v: "9:1", label: "9:1（極硬）" }
+            ];
+            contrastSel.innerHTML = '';
+            contrastOptions.forEach(c => contrastSel.add(new Option(c.label, c.v)));
+            
+            if (cfg.contrast_ratio) {
+                contrastSel.value = cfg.contrast_ratio;
+                contrastSel.disabled = false; // Modified: Always allow selection for standard presets
+            } else {
+                contrastSel.value = '';
+                contrastSel.disabled = true; // Only disabled for Golden Hour (null)
+            }
+
+            // Target - Set default but keep generic options
+            const opts = Array.from(targetSel.options).map(o => o.value);
+            if (opts.includes(cfg.default_target)) {
+                targetSel.value = cfg.default_target;
+            } else {
+                targetSel.value = 'Unspecified';
+            }
+        }
+
+        function updateThemePanel() {
+            const val = document.getElementById('pTheme').value;
+            const panel = document.getElementById('themePanel');
+            panel.style.display = val ? 'block' : 'none';
+            if(THEME_DATA[val]) {
+                const d = THEME_DATA[val];
+                document.getElementById('tHighlight').value = d.h;
+                document.getElementById('tShadow').value = d.s;
+                document.getElementById('tAccent').value = d.a;
+                document.getElementById('tTone').value = d.t;
+                ['h','s','a'].forEach(syncSwatch);
+            }
+        }
+
+        function syncSwatch(type) {
+            const hex = document.getElementById('t' + (type==='h'?'Highlight':type==='s'?'Shadow':'Accent')).value;
+            if(/^#[0-9A-F]{6}$/i.test(hex)) document.getElementById('swatch-'+type).style.backgroundColor = hex;
+        }
+
+        // --- Dynamic Lists (V14.5 + V1550) ---
+        function addRef(id="", type="Auxiliary", weight=0.8, age="N/A", note="") {
+            const div = document.createElement('div');
+            div.className = 'dynamic-item';
+            div.innerHTML = `
+                <button class="btn-remove" onclick="this.parentElement.remove()">✕</button>
+                <div class="row">
+                    <div class="col"><label>參考 ID</label><input type="text" class="r-id" value="${id}"></div>
+                    <div class="col"><label>類型</label><select class="r-type">
+                        <option value="Main Identity" ${type==="Main Identity"?'selected':''}>主身分</option>
+                        <option value="Style/Hair" ${type==="Style/Hair"?'selected':''}>髮型/風格</option>
+                        <option value="Expression" ${type==="Expression"?'selected':''}>表情參考</option>
+                        <option value="Auxiliary" ${type==="Auxiliary"?'selected':''}>輔助物件</option>
+                    </select></div>
+                    <div class="col"><label>權重</label><input type="number" class="r-weight" value="${weight}" step="0.1"></div>
+                    <div class="col"><label>年齡</label><input type="text" class="r-age" value="${age}"></div>
+                </div>
+                <input type="text" class="r-note" placeholder="備註..." value="${note}">
+            `;
+            document.getElementById('refList').appendChild(div);
+        }
+
+        function checkCloseup() { 
+            const val = document.getElementById('pShot').value || '';
+            const isClose = val.toLowerCase().includes('close-up');
+            document.getElementById('closeupBox').style.display = isClose ? 'block' : 'none';
+        }
+
+        // --- Edit Mode Logic (V14.5) ---
+        function toggleBgPreset() {
+            const enabled = document.getElementById('useBgPreset').checked;
+            document.getElementById('bgRefId').disabled = !enabled;
+            document.getElementById('bgLightOpt').disabled = !enabled;
+        }
+
+        function addModItem(key="", val="") { 
+            addModItemToDiv('modList', key, val, "例如: skin_texture", "例如: Remove wrinkles around eyes...");
+        }
+
+        function addSpatialItem(key="", val="") { 
+            addModItemToDiv('spatialList', key, val, "例如: depth_of_field", "例如: Background should be blurred...");
+        }
+
+        function addModItemToDiv(targetId, key="", val="", phKey="", phVal="") {
+            const div = document.createElement('div');
+            div.className = 'dynamic-item';
+            div.innerHTML = `
+                <button class="btn-remove" onclick="this.parentElement.remove()">✕</button>
+                <div class="row">
+                    <div class="col" style="flex:1;"><input type="text" class="${targetId === 'modList' ? 'm-key' : 's-key'}" placeholder="${phKey}" value="${key}"></div>
+                    <div class="col" style="flex:3;"><textarea class="${targetId === 'modList' ? 'm-val' : 's-val'}" style="height:60px;" placeholder="${phVal}">${val}</textarea></div>
+                </div>
+            `;
+            document.getElementById(targetId).appendChild(div);
+        }
+
+        // --- Data Gathering ---
+        function getGenData() {
+            const refs = Array.from(document.querySelectorAll('#refList .dynamic-item')).map(i => ({
+                id: i.querySelector('.r-id').value,
+                type: i.querySelector('.r-type').value,
+                weight: i.querySelector('.r-weight').value,
+                age: i.querySelector('.r-age').value,
+                note: i.querySelector('.r-note').value
+            }));
+            
+            // V14.5 Style Effects Gathering
+            const effects = Array.from(document.querySelectorAll('.effect-check:checked')).map(c => c.value);
+            if(!effects.includes("8K Resolution")) effects.push("8K Resolution");
+
+            // Closeup Logic
+            let closeupTarget = document.getElementById('pCloseupOther').value;
+            if (closeupTarget === 'Custom') closeupTarget = document.getElementById('customFocus').value;
+
+            return {
+                project: document.getElementById('pName').value,
+                photogenic_mode: document.getElementById('isPhotogenic').checked,
+                subject: document.getElementById('pSubject').value,
+                context: document.getElementById('pContext').value,
+                parameters: {
+                    style: document.getElementById('pStyle').value,
+                    shot_scale_lens: document.getElementById('pShot').value,
+                    closeup_focus: closeupTarget,
+                    angle: document.getElementById('pAngle').value,
+                    lighting: {
+                        preset: document.getElementById('pLight').value,
+                        angle: document.getElementById('lAngle').value,
+                        width: document.getElementById('lWidth').value,
+                        contrast: document.getElementById('lContrast').value,
+                        target: document.getElementById('lTarget').value
+                    },
+                    theme_color: {
+                        preset: document.getElementById('pTheme').value,
+                        highlight: document.getElementById('tHighlight').value,
+                        shadow: document.getElementById('tShadow').value,
+                        accent: document.getElementById('tAccent').value,
+                        tone: document.getElementById('tTone').value
+                    },
+                    special_effects: effects
+                },
+                reference_matrix: refs,
+                negative: document.getElementById('pNeg').value
+            };
+        }
+
+        function getEditData() {
+            const mods = {};
+            document.querySelectorAll('#modList .dynamic-item').forEach(i => {
+                const k = i.querySelector('.m-key').value.trim();
+                if(k) mods[k] = i.querySelector('.m-val').value;
+            });
+            const spatial = {};
+            document.querySelectorAll('#spatialList .dynamic-item').forEach(i => {
+                const k = i.querySelector('.s-key').value.trim();
+                if(k) spatial[k] = i.querySelector('.s-val').value;
+            });
+            
+            // Auto-inject logic (V14.5)
+            if (document.getElementById('useBgPreset').checked) {
+                const refId = document.getElementById('bgRefId').value || "[REFERENCE_ID]";
+                const lightingOpt = document.getElementById('bgLightOpt').value;
+                mods["subject_preservation"] = "Keep facial identity, expression, pose, and clothing exactly as is.";
+                mods["scene_reconstruction"] = `Replace background entirely using ${refId} as reference.`;
+                spatial["depth_separation"] = "Apply shallow depth of field (f/2.8) to blur background while keeping subject sharp.";
+                if (lightingOpt.includes("Keep Original")) {
+                    spatial["lighting_harmonization"] = "Apply minor adjustments to harmonize, but maintain original subject lighting direction.";
+                } else {
+                    spatial["lighting_harmonization"] = `Adjust subject's shadows and color temperature to fully match the ${refId} environment.`;
+                }
+            }
+
+            const negs = document.getElementById('eNeg').value.split(/,|\n/).map(s => s.trim()).filter(s => s);
+            let instruction = document.getElementById('eInstruction').value;
+            if(document.getElementById('useBgPreset').checked && !instruction) {
+                const refId = document.getElementById('bgRefId').value || "[REFERENCE_ID]";
+                instruction = `Recreate the primary image by replacing the background entirely with ${refId}, while STRICTLY preserving the subject's identity.`;
+            }
+
+            return {
+                project: document.getElementById('eName').value,
+                instruction: instruction,
+                modifications: mods,
+                spatial_logic: spatial,
+                negative_prompt: negs
+            };
+        }
+
+        function generateLocal() { 
+            const data = currentTab === 'gen' ? getGenData() : getEditData();
+            document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+        }
+
+        // --- Execution (V14.5 Logic) ---
+        async function runAI() {
+            const key = document.getElementById('apiKey').value.trim();
+            const model = document.getElementById('apiModel').value;
+            if(!model) return alert('請先掃描模型');
+            document.getElementById('output').textContent = "轉譯中...";
+            
+            let prompt = "";
+            let inputData = {};
+            
+            if (currentTab === 'gen') {
+                inputData = getGenData();
+                prompt = `You are a master photography prompt engineer. Translate inputs to pro English. 
+                Focus heavily on the 'lighting' object details (angle, width, contrast ratio) and 'theme_color' hex codes.
+                Input JSON: ${JSON.stringify(inputData)}.
+                Output ONLY valid JSON structure matching input but enriched.`;
+            } else {
+                inputData = getEditData();
+                prompt = `You are an AI image editing specialist. Transform the user input into a strict JSON format for image modification.
+                Rules: 1. Expand 'modifications' and 'spatial_logic' values into highly detailed, technical photography instructions.
+                2. Keep the output JSON structure identical to the input. Input Data: ${JSON.stringify(inputData)}`;
+            }
+
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({contents: [{parts: [{text: prompt}]}]})
+                });
+                const data = await res.json();
+                let text = data.candidates[0].content.parts[0].text;
+                document.getElementById('output').textContent = text.replace(/```json|```/gi, '').trim();
+            } catch (e) { document.getElementById('output').textContent = "連線失敗: " + e; }
+        }
+
+        function saveFile() {
+            const blob = new Blob([document.getElementById('output').textContent], {type: 'application/json'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            const fileName = currentTab === 'gen' ? document.getElementById('pName').value : document.getElementById('eName').value;
+            a.download = fileName + '.json';
+            a.click();
+        }
+
+        function loadFile(e) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const json = JSON.parse(event.target.result);
+                    // 簡易載入邏輯 - 僅顯示 JSON，實際回填 UI 邏輯在此省略以保持簡潔
+                    document.getElementById('output').textContent = JSON.stringify(json, null, 2);
+                    alert('檔案已讀取至預覽視窗 (UI回填僅支援部分欄位)');
+                } catch(ex) { alert('檔案格式錯誤'); }
+            };
+            reader.readAsText(e.target.files[0]);
+        }
+        function copyText() { navigator.clipboard.writeText(document.getElementById('output').textContent); alert('已複製'); }
+    </script>
+</body>
+</html>
