@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>AI Photo Station V15.5 - Merged Edition</title>
+    <title>AI Photo Station V1418 - Feature Complete</title>
     <style>
         :root { --bg: #0b0e14; --card: #161b22; --input: #0d1117; --text: #c9d1d9; --secondary: #58a6ff; --accent: #ff7b72; --success: #238636; --warning: #d29922; --tab-active: #1f6feb; }
         body { font-family: "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); padding: 20px; max-width: 1200px; margin: 0 auto; line-height: 1.5; }
@@ -29,19 +29,19 @@
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Sub Panels for V1550 Lighting/Theme */
+        /* Sub Panels for Lighting/Theme */
         .sub-panel { background: #0d1117; padding: 15px; border-radius: 8px; border-left: 3px solid var(--secondary); margin-top: 10px; display: none; }
         .color-item { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 8px; }
         .color-swatch { width: 18px; height: 18px; border-radius: 3px; border: 1px solid #8b949e; }
 
-        /* V14.5 Dynamic Lists & Effects */
+        /* Dynamic Lists & Effects */
         .dynamic-item { background: #1c2128; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #30363d; position: relative; }
         .btn-remove { position:absolute; right:10px; top:10px; background:none; border:none; color:var(--accent); cursor:pointer; font-weight:bold; }
         
         .preset-box { border: 1px dashed var(--secondary); padding: 15px; border-radius: 8px; margin-bottom: 15px; background: rgba(88, 166, 255, 0.1); }
         .help-text { font-size: 12px; color: #8b949e; margin-top: 5px; line-height: 1.4; }
         
-        /* V14.5 Effects Grid */
+        /* Effects Grid */
         .effects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; margin-top: 10px; }
         .effect-item { background: #21262d; padding: 8px; border-radius: 4px; display: flex; align-items: center; gap: 8px; font-size: 13px; border: 1px solid #30363d; cursor: pointer; }
         .effect-item:hover { border-color: var(--secondary); }
@@ -205,6 +205,32 @@
                 </div>
             </div>
 
+            <div class="row">
+                <div class="col">
+                    <label>表情 (Expression)</label>
+                    <select id="pExpression">
+                        <option value="">-- 未指定 --</option>
+                        <option value="Confident warm smile, showing teeth">自信露齒微笑 (Confident warm smile)</option>
+                        <option value="Gentle closed-lip smile">溫柔微笑 (Gentle closed-lip)</option>
+                        <option value="Confident smirk">自信歪嘴笑 (Confident smirk)</option>
+                        <option value="Sexy and alluring expression, bedroom eyes">性感誘人 (Sexy, bedroom eyes)</option>
+                        <option value="Neutral, relaxed">放鬆中性 (Neutral, relaxed)</option>
+                        <option value="Intense gaze">冷峻凝視 (Intense gaze)</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <label>情境氛圍 (Mood)</label>
+                    <select id="pMood">
+                        <option value="">-- 未指定 --</option>
+                        <option value="Introspective (Poetic, Calm)">沈靜內省 (Introspective)</option>
+                        <option value="Fashion Editorial (Bold, Vogue)">時尚社論 (Fashion Editorial)</option>
+                        <option value="Executive Aura (Refined, Modern)">商務美學 (Executive Aura)</option>
+                        <option value="Moody Noir (Mysterious)">神祕憂鬱 (Moody Noir)</option>
+                        <option value="Urban Lifestyle (Casual Elegance)">都會休閒 (Urban Lifestyle)</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="section" style="padding: 15px; margin-bottom: 15px; border-color: #30363d;">
                 <label>特殊效果 (Special Effects)</label>
                 <div class="effects-grid">
@@ -300,7 +326,7 @@
     <script>
         let currentTab = 'gen';
         
-        // --- Data Definitions (Modified V1550 Data) ---
+        // --- Data Definitions ---
         const THEME_DATA = {
             "Noir": { h: "#F8F4E3", s: "#111016", a: "#FFB000", t: "35° ~ 50° Warm" },
             "Executive": { h: "#E3D5CA", s: "#1A1A1A", a: "#4B3621", t: "Neutral" },
@@ -313,43 +339,43 @@
             "narrow_beam": {
                 name: "戲劇窄光 (Narrow Beam)",
                 default_angle: -28, default_width: "15%", contrast_ratio: "7:1",
-                default_target: "Unspecified", // Changed from V1550
+                default_target: "Unspecified",
                 description: "橫跨眼部的極窄光條，營造神祕感"
             },
             "diagonal_sun": {
                 name: "強烈斜射窗光 (Diagonal Sun)",
                 default_angle: -45, default_width: "20%", contrast_ratio: "5:1",
-                default_target: "Unspecified", // Changed from V1550
+                default_target: "Unspecified",
                 description: "模擬強烈陽光透過窗戶的條狀陰影"
             },
             "circular_backlight": {
                 name: "環狀背光 (Circular Light)",
                 default_angle: 0, default_width: "50%", contrast_ratio: "8:1",
-                default_target: "Unspecified", // Changed from V1550
+                default_target: "Unspecified",
                 description: "背景出現大圓形光斑，勾勒輪廓"
             },
             "geometric_skylight": {
                 name: "幾何天窗投影 (Geometric)",
                 default_angle: 75, default_width: "30%", contrast_ratio: "6:1",
-                default_target: "Unspecified", // Changed from V1550
+                default_target: "Unspecified",
                 description: "方格或塊狀光影，具備工業/科技感"
             },
             "harsh_flash": {
                 name: "直接硬閃光 (Harsh Flash)",
                 default_angle: 0, default_width: "100%", contrast_ratio: "9:1",
-                default_target: "Unspecified", // Changed from V1550
+                default_target: "Unspecified",
                 description: "正面強光，強調皮膚紋理與寫實度"
             },
             "soft_directional": {
                 name: "柔和定向光 (Soft Directional)",
                 default_angle: 45, default_width: "60%", contrast_ratio: "2:1",
-                default_target: "Unspecified", // Changed from V1550
+                default_target: "Unspecified",
                 description: "平滑的自然光，氣氛溫暖舒適"
             },
             "golden_hour": {
                 name: "黃金時刻 (Golden Hour)",
                 default_angle: null, default_width: null, contrast_ratio: null,
-                default_target: "Side of face and hair", // Kept specific
+                default_target: "Side of face and hair",
                 description: "自然環境夕陽光"
             }
         };
@@ -371,7 +397,7 @@
             document.getElementById('tab-' + tab).classList.add('active');
         }
 
-        // --- API & Model Logic (From V14.5) ---
+        // --- API & Model Logic ---
         function refreshKeyList() {
             const saved = JSON.parse(localStorage.getItem('v14_api_keys') || '{}');
             const select = document.getElementById('savedKeys');
@@ -433,7 +459,7 @@
             } catch (e) { alert('掃描失敗'); select.innerHTML = '<option value="">掃描失敗</option>'; }
         }
 
-        // --- Lighting & Theme Logic (Modified V1550) ---
+        // --- Lighting & Theme Logic ---
         function populateLightingOptions() {
             const sel = document.getElementById('pLight');
             sel.innerHTML = '<option value="">-- 未指定 --</option>';
@@ -467,7 +493,7 @@
                 widthInput.value = cfg.default_width;
             }
 
-            // Contrast - Populate and Set
+            // Contrast
             const contrastOptions = [
                 { v: "2:1", label: "2:1（柔和）" }, { v: "5:1", label: "5:1（高反差）" },
                 { v: "6:1", label: "6:1（硬光）" }, { v: "7:1", label: "7:1（極高）" },
@@ -478,13 +504,13 @@
             
             if (cfg.contrast_ratio) {
                 contrastSel.value = cfg.contrast_ratio;
-                contrastSel.disabled = false; // Modified: Always allow selection for standard presets
+                contrastSel.disabled = false;
             } else {
                 contrastSel.value = '';
-                contrastSel.disabled = true; // Only disabled for Golden Hour (null)
+                contrastSel.disabled = true;
             }
 
-            // Target - Set default but keep generic options
+            // Target
             const opts = Array.from(targetSel.options).map(o => o.value);
             if (opts.includes(cfg.default_target)) {
                 targetSel.value = cfg.default_target;
@@ -512,7 +538,7 @@
             if(/^#[0-9A-F]{6}$/i.test(hex)) document.getElementById('swatch-'+type).style.backgroundColor = hex;
         }
 
-        // --- Dynamic Lists (V14.5 + V1550) ---
+        // --- Dynamic Lists ---
         function addRef(id="", type="Auxiliary", weight=0.8, age="N/A", note="") {
             const div = document.createElement('div');
             div.className = 'dynamic-item';
@@ -540,7 +566,7 @@
             document.getElementById('closeupBox').style.display = isClose ? 'block' : 'none';
         }
 
-        // --- Edit Mode Logic (V14.5) ---
+        // --- Edit Mode Logic ---
         function toggleBgPreset() {
             const enabled = document.getElementById('useBgPreset').checked;
             document.getElementById('bgRefId').disabled = !enabled;
@@ -578,11 +604,9 @@
                 note: i.querySelector('.r-note').value
             }));
             
-            // V14.5 Style Effects Gathering
             const effects = Array.from(document.querySelectorAll('.effect-check:checked')).map(c => c.value);
             if(!effects.includes("8K Resolution")) effects.push("8K Resolution");
 
-            // Closeup Logic
             let closeupTarget = document.getElementById('pCloseupOther').value;
             if (closeupTarget === 'Custom') closeupTarget = document.getElementById('customFocus').value;
 
@@ -610,6 +634,9 @@
                         accent: document.getElementById('tAccent').value,
                         tone: document.getElementById('tTone').value
                     },
+                    // Added Expression & Mood (V1418)
+                    expression: document.getElementById('pExpression').value,
+                    mood_atmosphere: document.getElementById('pMood').value,
                     special_effects: effects
                 },
                 reference_matrix: refs,
@@ -629,7 +656,6 @@
                 if(k) spatial[k] = i.querySelector('.s-val').value;
             });
             
-            // Auto-inject logic (V14.5)
             if (document.getElementById('useBgPreset').checked) {
                 const refId = document.getElementById('bgRefId').value || "[REFERENCE_ID]";
                 const lightingOpt = document.getElementById('bgLightOpt').value;
@@ -664,7 +690,7 @@
             document.getElementById('output').textContent = JSON.stringify(data, null, 2);
         }
 
-        // --- Execution (V14.5 Logic) ---
+        // --- Execution ---
         async function runAI() {
             const key = document.getElementById('apiKey').value.trim();
             const model = document.getElementById('apiModel').value;
@@ -713,7 +739,6 @@
             reader.onload = (event) => {
                 try {
                     const json = JSON.parse(event.target.result);
-                    // 簡易載入邏輯 - 僅顯示 JSON，實際回填 UI 邏輯在此省略以保持簡潔
                     document.getElementById('output').textContent = JSON.stringify(json, null, 2);
                     alert('檔案已讀取至預覽視窗 (UI回填僅支援部分欄位)');
                 } catch(ex) { alert('檔案格式錯誤'); }
