@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>AI Photo Station V1418 - Feature Complete</title>
+    <title>AI Photo Station V14.21 - Lighting Defaults Updated</title>
     <style>
         :root { --bg: #0b0e14; --card: #161b22; --input: #0d1117; --text: #c9d1d9; --secondary: #58a6ff; --accent: #ff7b72; --success: #238636; --warning: #d29922; --tab-active: #1f6feb; }
         body { font-family: "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); padding: 20px; max-width: 1200px; margin: 0 auto; line-height: 1.5; }
@@ -219,14 +219,20 @@
                     </select>
                 </div>
                 <div class="col">
-                    <label>情境氛圍 (Mood)</label>
+                    <label>情緒氛圍 (Soul & Vibe)</label>
                     <select id="pMood">
                         <option value="">-- 未指定 --</option>
-                        <option value="Introspective (Poetic, Calm)">沈靜內省 (Introspective)</option>
-                        <option value="Fashion Editorial (Bold, Vogue)">時尚社論 (Fashion Editorial)</option>
-                        <option value="Executive Aura (Refined, Modern)">商務美學 (Executive Aura)</option>
-                        <option value="Moody Noir (Mysterious)">神祕憂鬱 (Moody Noir)</option>
-                        <option value="Urban Lifestyle (Casual Elegance)">都會休閒 (Urban Lifestyle)</option>
+                        <option value="poetic soul, contemplative quietude, meditative focus, gentle wisdom">詩人 (Poetic)</option>
+                        <option value="commanding presence, sharp powerful aura, bold dominance, stoic strength">霸氣 (Dominance)</option>
+                        <option value="enigmatic allure, hidden narrative, mysterious soul, cryptic expression">秘密 (Secrets)</option>
+                        <option value="rational mindset, professional stoicism, clean analytical gaze, cold refined order">理智 (Rational)</option>
+                        <option value="ethereal stillness, urban loneliness, detached soul, floating thoughts">靜寂 (Ethereal)</option>
+                        <option value="graceful ease, relaxed jawline, sophisticated effortless chic, serene state">鬆弛 (Relaxed)</option>
+                        <option value="raw unfiltered soul, vulnerable innocence, visceral human connection, pure expression">赤子 (Innocence)</option>
+                        <option value="seductive gaze, sensual aura, lips parted slightly, provocative storytelling, magnetic pull">魅惑 (Allure)</option>
+                        <option value="playful energy, youthful charm, cute pout, sparkling eyes, mischievous spirit">俏皮 (Playful)</option>
+                        <option value="rebellious spirit, raw energy, defiant gaze, unbridled passion, messy but controlled">狂野 (Untamed)</option>
+                        <option value="celestial grace, holy aura, sublime serenity, transcendental presence, glowing soul">空靈 (Sublime)</option>
                     </select>
                 </div>
             </div>
@@ -339,37 +345,37 @@
             "narrow_beam": {
                 name: "戲劇窄光 (Narrow Beam)",
                 default_angle: -28, default_width: "15%", contrast_ratio: "7:1",
-                default_target: "Unspecified",
+                default_target: "Across eyes and bridge of nose", // V14.21 Updated
                 description: "橫跨眼部的極窄光條，營造神祕感"
             },
             "diagonal_sun": {
                 name: "強烈斜射窗光 (Diagonal Sun)",
                 default_angle: -45, default_width: "20%", contrast_ratio: "5:1",
-                default_target: "Unspecified",
+                default_target: "Side of face and neck", // V14.21 Updated
                 description: "模擬強烈陽光透過窗戶的條狀陰影"
             },
             "circular_backlight": {
                 name: "環狀背光 (Circular Light)",
                 default_angle: 0, default_width: "50%", contrast_ratio: "8:1",
-                default_target: "Unspecified",
+                default_target: "Behind head", // V14.21 Updated
                 description: "背景出現大圓形光斑，勾勒輪廓"
             },
             "geometric_skylight": {
                 name: "幾何天窗投影 (Geometric)",
                 default_angle: 75, default_width: "30%", contrast_ratio: "6:1",
-                default_target: "Unspecified",
+                default_target: "Shoulders and chest", // V14.21 Updated
                 description: "方格或塊狀光影，具備工業/科技感"
             },
             "harsh_flash": {
                 name: "直接硬閃光 (Harsh Flash)",
                 default_angle: 0, default_width: "100%", contrast_ratio: "9:1",
-                default_target: "Unspecified",
+                default_target: "Center of face", // V14.21 Updated
                 description: "正面強光，強調皮膚紋理與寫實度"
             },
             "soft_directional": {
                 name: "柔和定向光 (Soft Directional)",
                 default_angle: 45, default_width: "60%", contrast_ratio: "2:1",
-                default_target: "Unspecified",
+                default_target: "Evenly on face", // V14.21 Updated
                 description: "平滑的自然光，氣氛溫暖舒適"
             },
             "golden_hour": {
@@ -634,8 +640,8 @@
                         accent: document.getElementById('tAccent').value,
                         tone: document.getElementById('tTone').value
                     },
-                    // Added Expression & Mood (V1418)
                     expression: document.getElementById('pExpression').value,
+                    // Updated mood to match V14.20
                     mood_atmosphere: document.getElementById('pMood').value,
                     special_effects: effects
                 },
