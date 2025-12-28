@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>AI Photo Station V14.21 - Lighting Defaults Updated</title>
+    <title>AI Photo Station V14.24 - Aspect Ratio & Physics Visibility</title>
     <style>
         :root { --bg: #0b0e14; --card: #161b22; --input: #0d1117; --text: #c9d1d9; --secondary: #58a6ff; --accent: #ff7b72; --success: #238636; --warning: #d29922; --tab-active: #1f6feb; }
         body { font-family: "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); padding: 20px; max-width: 1200px; margin: 0 auto; line-height: 1.5; }
@@ -95,8 +95,21 @@
         <div class="section">
             <label style="color: var(--secondary);"><input type="checkbox" id="isPhotogenic" checked> ✨ Photogenic Mode (取景美學與肢體動態校正)</label>
             <div class="row" style="margin-top:15px;">
-                <div class="col"><label>專案名稱</label><input type="text" id="pName" value="New_Project"></div>
-                <div class="col">
+                <div class="col" style="flex:1.5;"><label>專案名稱</label><input type="text" id="pName" value="New_Project"></div>
+                <div class="col" style="flex:1;">
+                    <label>畫面比例 (Aspect Ratio)</label>
+                    <select id="pAspectRatio" onchange="checkAspectRatio()">
+                        <option value="9:16">9:16</option>
+                        <option value="4:5">4:5</option>
+                        <option value="1:1">1:1</option>
+                        <option value="16:9">16:9</option>
+                        <option value="5:4">5:4</option>
+                        <option value="Custom">其他 (Custom)</option>
+                    </select>
+                    <input type="text" id="pAspectRatioCustom" class="highlight-input" placeholder="例如 21:9" style="display:none; margin-top:5px;">
+                </div>
+                
+                <div class="col" style="flex:2;">
                     <label>視覺風格</label>
                     <select id="pStyle">
                         <option value="Hyper-Realistic Portraiture (PBR)">超寫實人像 (PBR)</option>
@@ -187,6 +200,7 @@
                         <option value="Modern Tech">都會科技 (Modern Tech)</option>
                         <option value="Vintage Film">復古膠捲 (Vintage Film)</option>
                         <option value="Prism">虹光折射 (Prism)</option>
+                        <option value="Autumnal Ember Palette">浪漫楓紅 (Autumnal Ember)</option>
                         <option value="Custom">自指定...</option>
                     </select>
                     <div id="themePanel" class="sub-panel">
@@ -200,6 +214,7 @@
                             <option value="6500K Cool">6500K Cool</option>
                             <option value="Low Saturation">Low Saturation</option>
                             <option value="Dynamic">Dynamic</option>
+                            <option value="Dominantly warm color temperature (3500K - 5000K)">Warm Autumn (3500K-5000K)</option>
                         </select>
                     </div>
                 </div>
@@ -222,17 +237,17 @@
                     <label>情緒氛圍 (Soul & Vibe)</label>
                     <select id="pMood">
                         <option value="">-- 未指定 --</option>
-                        <option value="poetic soul, contemplative quietude, meditative focus, gentle wisdom">詩人 (Poetic)</option>
-                        <option value="commanding presence, sharp powerful aura, bold dominance, stoic strength">霸氣 (Dominance)</option>
-                        <option value="enigmatic allure, hidden narrative, mysterious soul, cryptic expression">秘密 (Secrets)</option>
-                        <option value="rational mindset, professional stoicism, clean analytical gaze, cold refined order">理智 (Rational)</option>
-                        <option value="ethereal stillness, urban loneliness, detached soul, floating thoughts">靜寂 (Ethereal)</option>
-                        <option value="graceful ease, relaxed jawline, sophisticated effortless chic, serene state">鬆弛 (Relaxed)</option>
-                        <option value="raw unfiltered soul, vulnerable innocence, visceral human connection, pure expression">赤子 (Innocence)</option>
-                        <option value="seductive gaze, sensual aura, lips parted slightly, provocative storytelling, magnetic pull">魅惑 (Allure)</option>
-                        <option value="playful energy, youthful charm, cute pout, sparkling eyes, mischievous spirit">俏皮 (Playful)</option>
-                        <option value="rebellious spirit, raw energy, defiant gaze, unbridled passion, messy but controlled">狂野 (Untamed)</option>
-                        <option value="celestial grace, holy aura, sublime serenity, transcendental presence, glowing soul">空靈 (Sublime)</option>
+                        <option value="poetic soul, contemplative quietude, meditative focus, gentle wisdom">詩人 (Poetic): 如同詩人般的深沉思索，眼神安靜且充滿故事。</option>
+                        <option value="commanding presence, sharp powerful aura, bold dominance, stoic strength">霸氣 (Dominance): 絕對的氣場統治力，眼神銳利，展現強大的自信與力量。</option>
+                        <option value="enigmatic allure, hidden narrative, mysterious soul, cryptic expression">秘密 (Secrets): 欲言又止的神祕感，像是有著不為人知的內在世界。</option>
+                        <option value="rational mindset, professional stoicism, clean analytical gaze, cold refined order">理智 (Rational): 極度冷靜與精確，不帶私人情緒，展現專業的秩序美感。</option>
+                        <option value="ethereal stillness, urban loneliness, detached soul, floating thoughts">靜寂 (Ethereal): 都會中的游離感，靈魂彷彿暫時離開現實，處於靜謐狀態。</option>
+                        <option value="graceful ease, relaxed jawline, sophisticated effortless chic, serene state">鬆弛 (Relaxed): 高級的從容感，姿態隨性但不失優雅，完全放鬆的狀態。</option>
+                        <option value="raw unfiltered soul, vulnerable innocence, visceral human connection, pure expression">赤子 (Innocence): 最真實、赤裸且無防備的狀態，直擊人心的純真與脆弱。</option>
+                        <option value="seductive gaze, sensual aura, lips parted slightly, provocative storytelling, magnetic pull">魅惑 (Allure): 極具吸引力的神態，眼神帶電，唇齒微啟的性感張力。</option>
+                        <option value="playful energy, youthful charm, cute pout, sparkling eyes, mischievous spirit">俏皮 (Playful): 充滿生命力的可愛感，嘟嘴或靈動的眼神，顯得親切活潑。</option>
+                        <option value="rebellious spirit, raw energy, defiant gaze, unbridled passion, messy but controlled">狂野 (Untamed): 反叛且狂放不羈，帶有一種野性與原始的生命能量。</option>
+                        <option value="celestial grace, holy aura, sublime serenity, transcendental presence, glowing soul">空靈 (Sublime): 超脫世俗的莊嚴質感，純淨而神聖，充滿內在的光輝。</option>
                     </select>
                 </div>
             </div>
@@ -252,9 +267,9 @@
             </div>
 
             <div class="section" style="margin-bottom:0; padding-bottom:10px;">
-                <h3>多重參考圖矩陣</h3>
-                <div id="refList"></div>
-                <button class="btn btn-tool" onclick="addRef()">+ 新增參考圖</button>
+                <h3>多重參考圖矩陣 (Gen)</h3>
+                <div id="genRefList"></div>
+                <button class="btn btn-tool" onclick="addRef('genRefList')">+ 新增參考圖</button>
             </div>
             
              <div class="section" style="margin-top: 20px;">
@@ -310,6 +325,12 @@
         </div>
 
         <div class="section">
+            <h3>多重參考圖矩陣 (Edit)</h3>
+            <div id="editRefList"></div>
+            <button class="btn btn-tool" onclick="addRef('editRefList')">+ 新增參考圖</button>
+        </div>
+
+        <div class="section">
             <label>🚫 改圖負面提示詞 (Negative Prompt)</label>
             <textarea id="eNeg" style="height: 60px;">leaves covering man, cluttered composition, eye wrinkles, plastic skin</textarea>
         </div>
@@ -338,44 +359,45 @@
             "Executive": { h: "#E3D5CA", s: "#1A1A1A", a: "#4B3621", t: "Neutral" },
             "Modern Tech": { h: "#FFFFFF", s: "#001F3F", a: "#C0C0C0", t: "6500K Cool" },
             "Vintage Film": { h: "#C3B091", s: "#2D5A27", a: "#D2691E", t: "Low Saturation" },
-            "Prism": { h: "#8E8E8E", s: "#000000", a: "#FF00FF", t: "Dynamic" }
+            "Prism": { h: "#8E8E8E", s: "#000000", a: "#FF00FF", t: "Dynamic" },
+            "Autumnal Ember Palette": { h: "#E65D00", s: "#9B0000", a: "#F9A602", t: "Dominantly warm color temperature (3500K - 5000K)" }
         };
 
         const LIGHTING_DATA = {
             "narrow_beam": {
                 name: "戲劇窄光 (Narrow Beam)",
                 default_angle: -28, default_width: "15%", contrast_ratio: "7:1",
-                default_target: "Across eyes and bridge of nose", // V14.21 Updated
+                default_target: "Across eyes and bridge of nose",
                 description: "橫跨眼部的極窄光條，營造神祕感"
             },
             "diagonal_sun": {
                 name: "強烈斜射窗光 (Diagonal Sun)",
                 default_angle: -45, default_width: "20%", contrast_ratio: "5:1",
-                default_target: "Side of face and neck", // V14.21 Updated
+                default_target: "Side of face and neck",
                 description: "模擬強烈陽光透過窗戶的條狀陰影"
             },
             "circular_backlight": {
                 name: "環狀背光 (Circular Light)",
                 default_angle: 0, default_width: "50%", contrast_ratio: "8:1",
-                default_target: "Behind head", // V14.21 Updated
+                default_target: "Behind head",
                 description: "背景出現大圓形光斑，勾勒輪廓"
             },
             "geometric_skylight": {
                 name: "幾何天窗投影 (Geometric)",
                 default_angle: 75, default_width: "30%", contrast_ratio: "6:1",
-                default_target: "Shoulders and chest", // V14.21 Updated
+                default_target: "Shoulders and chest",
                 description: "方格或塊狀光影，具備工業/科技感"
             },
             "harsh_flash": {
                 name: "直接硬閃光 (Harsh Flash)",
                 default_angle: 0, default_width: "100%", contrast_ratio: "9:1",
-                default_target: "Center of face", // V14.21 Updated
+                default_target: "Center of face",
                 description: "正面強光，強調皮膚紋理與寫實度"
             },
             "soft_directional": {
                 name: "柔和定向光 (Soft Directional)",
                 default_angle: 45, default_width: "60%", contrast_ratio: "2:1",
-                default_target: "Evenly on face", // V14.21 Updated
+                default_target: "Evenly on face",
                 description: "平滑的自然光，氣氛溫暖舒適"
             },
             "golden_hour": {
@@ -390,7 +412,7 @@
         function init() {
             refreshKeyList();
             populateLightingOptions();
-            if(document.getElementById('refList').children.length === 0) addRef("man_face", "Main Identity", 1.0, "25");
+            if(document.getElementById('genRefList').children.length === 0) addRef("genRefList", "man_face", "Main Identity", 1.0, "25");
             if(document.getElementById('modList').children.length === 0) addModItem("skin_texture", "Remove wrinkles around eyes...");
         }
 
@@ -410,8 +432,8 @@
             select.innerHTML = '<option value="">-- 選擇已存的金鑰 --</option>';
             for(let name in saved) {
                 const opt = document.createElement('option');
-                opt.value = saved[name];
-                opt.text = name;
+                opt.value = saved[name]; // Store the KEY in value
+                opt.text = name;         // Store the NAME in text
                 select.appendChild(opt);
             }
         }
@@ -428,8 +450,11 @@
         }
 
         function loadSelectedKey() {
-            const key = document.getElementById('savedKeys').value;
-            if(key) document.getElementById('apiKey').value = key;
+            const select = document.getElementById('savedKeys');
+            const key = select.value; 
+            if(key) {
+                document.getElementById('apiKey').value = key;
+            }
         }
 
         function deleteKey() {
@@ -489,12 +514,13 @@
 
             // Angle & Width
             if (cfg.default_angle === null && cfg.default_width === null) {
-                angleInput.value = ''; widthInput.value = '';
+                angleInput.value = ''; widthInput.value = ''; // Always reset if not applicable
                 angleInput.placeholder = '— 不適用 —'; widthInput.placeholder = '— 不適用 —';
                 angleInput.disabled = true; widthInput.disabled = true;
             } else {
                 angleInput.disabled = false; widthInput.disabled = false;
                 angleInput.placeholder = ''; widthInput.placeholder = '';
+                // Logic V14.23: Fixed to always set default when switching preset
                 angleInput.value = cfg.default_angle;
                 widthInput.value = cfg.default_width;
             }
@@ -531,6 +557,7 @@
             panel.style.display = val ? 'block' : 'none';
             if(THEME_DATA[val]) {
                 const d = THEME_DATA[val];
+                // Always overwrite when switching presets
                 document.getElementById('tHighlight').value = d.h;
                 document.getElementById('tShadow').value = d.s;
                 document.getElementById('tAccent').value = d.a;
@@ -544,8 +571,13 @@
             if(/^#[0-9A-F]{6}$/i.test(hex)) document.getElementById('swatch-'+type).style.backgroundColor = hex;
         }
 
+        function checkAspectRatio() {
+            const val = document.getElementById('pAspectRatio').value;
+            document.getElementById('pAspectRatioCustom').style.display = (val === 'Custom') ? 'block' : 'none';
+        }
+
         // --- Dynamic Lists ---
-        function addRef(id="", type="Auxiliary", weight=0.8, age="N/A", note="") {
+        function addRef(targetId, id="", type="Auxiliary", weight=0.8, age="N/A", note="") {
             const div = document.createElement('div');
             div.className = 'dynamic-item';
             div.innerHTML = `
@@ -563,7 +595,7 @@
                 </div>
                 <input type="text" class="r-note" placeholder="備註..." value="${note}">
             `;
-            document.getElementById('refList').appendChild(div);
+            document.getElementById(targetId).appendChild(div);
         }
 
         function checkCloseup() { 
@@ -602,23 +634,49 @@
 
         // --- Data Gathering ---
         function getGenData() {
-            const refs = Array.from(document.querySelectorAll('#refList .dynamic-item')).map(i => ({
+            const refs = Array.from(document.querySelectorAll('#genRefList .dynamic-item')).map(i => ({
                 id: i.querySelector('.r-id').value,
                 type: i.querySelector('.r-type').value,
                 weight: i.querySelector('.r-weight').value,
                 age: i.querySelector('.r-age').value,
                 note: i.querySelector('.r-note').value
             }));
+
+            let mainAge = "25";
+            const mainRef = refs.find(r => r.type === "Main Identity");
+            if(mainRef && mainRef.age) mainAge = mainRef.age.replace(/\D/g, '') || "25";
             
             const effects = Array.from(document.querySelectorAll('.effect-check:checked')).map(c => c.value);
+            // V14.24: Ensure 8K is pushed if not present (logic maintained)
             if(!effects.includes("8K Resolution")) effects.push("8K Resolution");
 
             let closeupTarget = document.getElementById('pCloseupOther').value;
             if (closeupTarget === 'Custom') closeupTarget = document.getElementById('customFocus').value;
 
+            // V14.24: Collect Aspect Ratio
+            let aspectRatio = document.getElementById('pAspectRatio').value;
+            if(aspectRatio === 'Custom') aspectRatio = document.getElementById('pAspectRatioCustom').value;
+
             return {
                 project: document.getElementById('pName').value,
                 photogenic_mode: document.getElementById('isPhotogenic').checked,
+                // V14.24: Expose Technical Parameters & Skin Physics to ROOT
+                technical_parameters: {
+                    "aspect_ratio": aspectRatio,
+                    "resolution": "8K Ultra-HD",
+                    "focus": "Optical-grade sharpness on the eyes and skin pores",
+                    "detail_level": "Hyper-realistic skin physics and fabric weave texture"
+                },
+                skin_physics: {
+                     "age_spec": `${mainAge} years old`,
+                     "face_logic": `Youthful ${mainAge}yo facial structure. High collagen density. Natural skin movement with zero permanent aging lines.`,
+                     "skin_surface": {
+                        "pore_variation": "Non-uniform pore variation (T-zone vs cheeks). No synthetic smoothing.",
+                        "subsurface_scattering": "High SSS effect visible in highlights, creating a warm, living glow through the dermis.",
+                        "reflectivity": "Natural hydrated sheen and sebaceous oil reflection, not a uniform synthetic gloss.",
+                        "chromatic_variation": "Subtle color temperature shifts across facial zones (micro-vascularity and blood flow visibility)."
+                    }
+                },
                 subject: document.getElementById('pSubject').value,
                 context: document.getElementById('pContext').value,
                 parameters: {
@@ -641,7 +699,6 @@
                         tone: document.getElementById('tTone').value
                     },
                     expression: document.getElementById('pExpression').value,
-                    // Updated mood to match V14.20
                     mood_atmosphere: document.getElementById('pMood').value,
                     special_effects: effects
                 },
@@ -651,6 +708,14 @@
         }
 
         function getEditData() {
+            const refs = Array.from(document.querySelectorAll('#editRefList .dynamic-item')).map(i => ({
+                id: i.querySelector('.r-id').value,
+                type: i.querySelector('.r-type').value,
+                weight: i.querySelector('.r-weight').value,
+                age: i.querySelector('.r-age').value,
+                note: i.querySelector('.r-note').value
+            }));
+
             const mods = {};
             document.querySelectorAll('#modList .dynamic-item').forEach(i => {
                 const k = i.querySelector('.m-key').value.trim();
@@ -687,7 +752,8 @@
                 instruction: instruction,
                 modifications: mods,
                 spatial_logic: spatial,
-                negative_prompt: negs
+                negative_prompt: negs,
+                reference_matrix: refs 
             };
         }
 
@@ -740,14 +806,136 @@
             a.click();
         }
 
+        // V14.24: Full UI Restoration with Aspect Ratio
         function loadFile(e) {
             const reader = new FileReader();
             reader.onload = (event) => {
                 try {
                     const json = JSON.parse(event.target.result);
+                    
+                    if (json.instruction) {
+                        switchTab('edit');
+                        document.getElementById('eName').value = json.project || "Edit_Project";
+                        document.getElementById('eInstruction').value = json.instruction || "";
+                        document.getElementById('eNeg').value = (json.negative_prompt || []).join(', ');
+                        
+                        document.getElementById('modList').innerHTML = "";
+                        if(json.modifications) Object.entries(json.modifications).forEach(([k, v]) => {
+                            if(k !== "subject_preservation" && k !== "scene_reconstruction") addModItem(k, v);
+                        });
+                        
+                        document.getElementById('spatialList').innerHTML = "";
+                        if(json.spatial_logic) Object.entries(json.spatial_logic).forEach(([k, v]) => {
+                             if(k !== "depth_separation" && k !== "lighting_harmonization") addSpatialItem(k, v);
+                        });
+
+                        const matrix = json.reference_matrix || [];
+                        document.getElementById('editRefList').innerHTML = "";
+                        if(Array.isArray(matrix)) {
+                            matrix.forEach(r => addRef('editRefList', r.id, r.type, r.weight, r.age, r.note));
+                        }
+
+                    } else {
+                        switchTab('gen');
+                        document.getElementById('pName').value = json.project || "New_Project";
+                        document.getElementById('pSubject').value = json.subject || "";
+                        document.getElementById('pContext').value = json.context || "";
+                        document.getElementById('pNeg').value = json.negative || "";
+                        document.getElementById('isPhotogenic').checked = json.photogenic_mode !== false;
+
+                        // Restore Aspect Ratio (V14.24)
+                        if (json.technical_parameters && json.technical_parameters.aspect_ratio) {
+                            const ar = json.technical_parameters.aspect_ratio;
+                            const arSelect = document.getElementById('pAspectRatio');
+                            const arCustom = document.getElementById('pAspectRatioCustom');
+                            const known = ["9:16", "4:5", "1:1", "16:9", "5:4"];
+                            
+                            if (known.includes(ar)) {
+                                arSelect.value = ar;
+                                arCustom.style.display = 'none';
+                            } else {
+                                arSelect.value = 'Custom';
+                                arCustom.value = ar;
+                                arCustom.style.display = 'block';
+                            }
+                        }
+
+                        if(json.parameters) {
+                            const p = json.parameters;
+                            document.getElementById('pStyle').value = p.style || "";
+                            document.getElementById('pShot').value = p.shot_scale_lens || "";
+                            document.getElementById('pAngle').value = p.angle || "";
+                            document.getElementById('pExpression').value = p.expression || "";
+                            document.getElementById('pMood').value = p.mood_atmosphere || "";
+
+                            // Lighting
+                            if(p.lighting) {
+                                document.getElementById('pLight').value = p.lighting.preset || "";
+                                updateLightPanel(); 
+                                if(p.lighting.angle) document.getElementById('lAngle').value = p.lighting.angle;
+                                if(p.lighting.width) document.getElementById('lWidth').value = p.lighting.width;
+                                if(p.lighting.contrast) document.getElementById('lContrast').value = p.lighting.contrast;
+                                if(p.lighting.target) document.getElementById('lTarget').value = p.lighting.target;
+                            }
+
+                            // Theme
+                            if(p.theme_color) {
+                                document.getElementById('pTheme').value = p.theme_color.preset || "";
+                                updateThemePanel();
+                                if(p.theme_color.highlight) { 
+                                    document.getElementById('tHighlight').value = p.theme_color.highlight;
+                                    syncSwatch('h');
+                                }
+                                if(p.theme_color.shadow) { 
+                                    document.getElementById('tShadow').value = p.theme_color.shadow;
+                                    syncSwatch('s');
+                                }
+                                if(p.theme_color.accent) { 
+                                    document.getElementById('tAccent').value = p.theme_color.accent;
+                                    syncSwatch('a');
+                                }
+                                if(p.theme_color.tone) document.getElementById('tTone').value = p.theme_color.tone;
+                            }
+
+                            // Closeup
+                            const savedCloseup = p.closeup_focus || "";
+                            const select = document.getElementById('pCloseupOther');
+                            const otherInput = document.getElementById('customFocus');
+                            const options = Array.from(select.options).map(o => o.value);
+                            
+                            if(options.includes(savedCloseup)) {
+                                select.value = savedCloseup;
+                                otherInput.style.display = 'none';
+                            } else if (savedCloseup) {
+                                select.value = 'Custom';
+                                otherInput.value = savedCloseup;
+                                otherInput.style.display = 'block';
+                            } else {
+                                select.value = "Eyes"; // Default fallback
+                                otherInput.style.display = 'none';
+                            }
+                            checkCloseup();
+
+                            // Effects
+                            const savedEffects = p.special_effects || [];
+                            document.querySelectorAll('.effect-check').forEach(cb => {
+                                cb.checked = savedEffects.includes(cb.value);
+                            });
+                        }
+
+                        // References (Gen)
+                        const matrix = json.reference_matrix || [];
+                        document.getElementById('genRefList').innerHTML = "";
+                        if(Array.isArray(matrix)) {
+                            matrix.forEach(r => addRef('genRefList', r.id, r.type, r.weight, r.age, r.note));
+                        }
+                    }
+                    
                     document.getElementById('output').textContent = JSON.stringify(json, null, 2);
-                    alert('檔案已讀取至預覽視窗 (UI回填僅支援部分欄位)');
-                } catch(ex) { alert('檔案格式錯誤'); }
+                    alert('讀取成功，UI 與設定已還原。');
+                } catch(ex) { 
+                    alert('檔案格式錯誤或損毀: ' + ex); 
+                }
             };
             reader.readAsText(e.target.files[0]);
         }
