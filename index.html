@@ -2,53 +2,109 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>AI Photo Station V14.24 - Aspect Ratio & Physics Visibility</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Photo Station V14.25 - Physics & DoF Update</title>
     <style>
-        :root { --bg: #0b0e14; --card: #161b22; --input: #0d1117; --text: #c9d1d9; --secondary: #58a6ff; --accent: #ff7b72; --success: #238636; --warning: #d29922; --tab-active: #1f6feb; }
-        body { font-family: "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); padding: 20px; max-width: 1200px; margin: 0 auto; line-height: 1.5; }
-        .section { background: var(--card); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #30363d; }
-        .row { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; align-items: flex-end; }
-        .col { flex: 1; min-width: 200px; }
-        label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 13px; color: #8b949e; }
-        select, input[type="text"], input[type="password"], input[type="number"], textarea { width: 100%; padding: 10px; background: var(--input); border: 1px solid #30363d; color: #fff; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        :root { --bg: #0b0e14;
+            --card: #161b22; --input: #0d1117; --text: #c9d1d9; --secondary: #58a6ff; --accent: #ff7b72; --success: #238636; --warning: #d29922; --tab-active: #1f6feb;
+        }
+        body { font-family: "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text);
+            padding: 20px; max-width: 1200px; margin: 0 auto; line-height: 1.5; }
+        .section { background: var(--card);
+            padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #30363d;
+        }
+        .row { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; align-items: flex-end;
+        }
+        .col { flex: 1; min-width: 200px;
+        }
+        label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 13px; color: #8b949e;
+        }
+        select, input[type="text"], input[type="password"], input[type="number"], textarea { width: 100%; padding: 10px; background: var(--input);
+            border: 1px solid #30363d; color: #fff; border-radius: 6px; box-sizing: border-box; font-size: 14px;
+        }
         
-        .btn { padding: 12px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 14px; white-space: nowrap; }
-        .btn-gen { background: var(--success); color: white; width: 100%; }
-        .btn-api { background: var(--secondary); color: white; width: 100%; }
-        .btn-scan { background: var(--warning); color: #000; }
-        .btn-tool { background: #30363d; color: white; }
-        .btn-save { background: #238636; color: white; }
-        .btn-del { background: #da3633; color: white; }
+        .btn { padding: 12px 15px;
+            border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 14px; white-space: nowrap;
+        }
+        .btn-gen { background: var(--success); color: white; width: 100%;
+        }
+        .btn-api { background: var(--secondary); color: white; width: 100%;
+        }
+        .btn-scan { background: var(--warning); color: #000;
+        }
+        .btn-tool { background: #30363d; color: white;
+        }
+        .btn-save { background: #238636; color: white;
+        }
+        .btn-del { background: #da3633; color: white;
+        }
 
-        .tab-header { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
-        .tab-btn { background: #21262d; color: #8b949e; flex: 1; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; border: 1px solid transparent; font-weight: bold; }
-        .tab-btn.active { background: var(--tab-active); color: white; border-color: var(--secondary); }
-        .tab-btn:hover { background: #30363d; }
+        .tab-header { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid #30363d;
+            padding-bottom: 10px; }
+        .tab-btn { background: #21262d; color: #8b949e; flex: 1; padding: 12px;
+            border-radius: 8px; text-align: center; cursor: pointer; border: 1px solid transparent; font-weight: bold;
+        }
+        .tab-btn.active { background: var(--tab-active); color: white; border-color: var(--secondary);
+        }
+        .tab-btn:hover { background: #30363d;
+        }
         
-        .tab-content { display: none; animation: fadeIn 0.3s; }
-        .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-content { display: none;
+            animation: fadeIn 0.3s; }
+        .tab-content.active { display: block;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px);
+        } to { opacity: 1; transform: translateY(0); } }
 
         /* Sub Panels for Lighting/Theme */
-        .sub-panel { background: #0d1117; padding: 15px; border-radius: 8px; border-left: 3px solid var(--secondary); margin-top: 10px; display: none; }
-        .color-item { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 8px; }
-        .color-swatch { width: 18px; height: 18px; border-radius: 3px; border: 1px solid #8b949e; }
+        .sub-panel { background: #0d1117;
+            padding: 15px; border-radius: 8px; border-left: 3px solid var(--secondary); margin-top: 10px; display: none;
+        }
+        .color-item { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 8px;
+        }
+        .color-swatch { width: 18px; height: 18px; border-radius: 3px; border: 1px solid #8b949e;
+        }
 
         /* Dynamic Lists & Effects */
-        .dynamic-item { background: #1c2128; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #30363d; position: relative; }
-        .btn-remove { position:absolute; right:10px; top:10px; background:none; border:none; color:var(--accent); cursor:pointer; font-weight:bold; }
+        .dynamic-item { background: #1c2128;
+            padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #30363d; position: relative;
+        }
+        .btn-remove { position:absolute; right:10px; top:10px; background:none; border:none; color:var(--accent); cursor:pointer; font-weight:bold;
+        }
         
-        .preset-box { border: 1px dashed var(--secondary); padding: 15px; border-radius: 8px; margin-bottom: 15px; background: rgba(88, 166, 255, 0.1); }
-        .help-text { font-size: 12px; color: #8b949e; margin-top: 5px; line-height: 1.4; }
+        .preset-box { border: 1px dashed var(--secondary);
+            padding: 15px; border-radius: 8px; margin-bottom: 15px; background: rgba(88, 166, 255, 0.1);
+        }
+        .help-text { font-size: 12px; color: #8b949e; margin-top: 5px; line-height: 1.4;
+        }
         
         /* Effects Grid */
-        .effects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; margin-top: 10px; }
-        .effect-item { background: #21262d; padding: 8px; border-radius: 4px; display: flex; align-items: center; gap: 8px; font-size: 13px; border: 1px solid #30363d; cursor: pointer; }
-        .effect-item:hover { border-color: var(--secondary); }
+        .effects-grid { display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; margin-top: 10px; }
+        .effect-item { background: #21262d;
+            padding: 8px; border-radius: 4px; display: flex; align-items: center; gap: 8px; font-size: 13px; border: 1px solid #30363d; cursor: pointer;
+        }
+        .effect-item:hover { border-color: var(--secondary);
+        }
 
-        pre { background: #010409; padding: 20px; border-radius: 8px; color: #7ee787; border: 1px solid #30363d; white-space: pre-wrap; font-family: 'Consolas', monospace; min-height: 150px; font-size: 13px; }
-        .status-dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; background: #8b949e; }
-        .status-ok { background: var(--success); box-shadow: 0 0 5px var(--success); }
+        pre { background: #010409; padding: 20px; border-radius: 8px; color: #7ee787;
+            border: 1px solid #30363d; white-space: pre-wrap; font-family: 'Consolas', monospace; min-height: 150px; font-size: 13px;
+        }
+        .status-dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; background: #8b949e;
+        }
+        .status-ok { background: var(--success); box-shadow: 0 0 5px var(--success);
+        }
+
+        /* RWD Improvements (V14.25) */
+        @media (max-width: 768px) {
+            .row { flex-direction: column; gap: 10px; }
+            .col { min-width: 100%; flex: 1 !important; }
+            .tab-header { flex-direction: row; } 
+            .btn { width: 100%; margin-bottom: 5px; }
+            .effects-grid { grid-template-columns: 1fr; }
+            .color-item { flex-wrap: wrap; }
+            .color-item label { width: 100% !important; margin-bottom: 2px; }
+        }
     </style>
 </head>
 <body onload="init()">
@@ -83,7 +139,8 @@
                 <select id="apiModel"><option value="">請先掃描...</option></select>
             </div>
         </div>
-        <div id="statusMsg" style="font-size:12px; color:#8b949e; margin-top:5px;"><span class="status-dot" id="statusDot"></span> 就緒</div>
+        <div id="statusMsg" style="font-size:12px;
+color:#8b949e; margin-top:5px;"><span class="status-dot" id="statusDot"></span> 就緒</div>
     </div>
 
     <div class="tab-header">
@@ -106,7 +163,8 @@
                         <option value="5:4">5:4</option>
                         <option value="Custom">其他 (Custom)</option>
                     </select>
-                    <input type="text" id="pAspectRatioCustom" class="highlight-input" placeholder="例如 21:9" style="display:none; margin-top:5px;">
+                    <input type="text" id="pAspectRatioCustom" class="highlight-input" placeholder="例如 21:9" style="display:none;
+margin-top:5px;">
                 </div>
                 
                 <div class="col" style="flex:2;">
@@ -150,6 +208,22 @@
                         <option value="Extreme close-up / Macro">極致特寫 (Extreme CU) / 微距鏡</option>
                     </select>
                 </div>
+                <div class="col">
+                    <label>景深控制 (DoF)</label>
+                    <select id="pDoF">
+                        <option value="Shallow Depth of Field">淺景深 (Shallow)</option>
+                        <option value="Deep Depth of Field">深景深 (Deep)</option>
+                        <option value="No Depth of Field">無景深 (None)</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <label>對焦對象 (Focus Target)</label>
+                    <select id="pFocusTarget">
+                        <option value="Focus on Subject">主體 (Subject)</option>
+                        <option value="Focus on Background">背景 (Background)</option>
+                    </select>
+                </div>
+                
                 <div class="col" id="closeupBox" style="display:none;"><label style="color:var(--accent)">特寫部位 (Focus Area)</label>
                     <select id="pCloseupOther" onchange="document.getElementById('customFocus').style.display = (this.value==='Custom')?'block':'none';">
                         <option value="Eyes">眼睛 (Eyes)</option>
@@ -161,7 +235,8 @@
                         <option value="Sweat / Skin pores">汗水 / 毛孔細節</option>
                         <option value="Custom">自訂描述…</option>
                     </select>
-                    <input type="text" id="customFocus" style="display:none; margin-top:8px;" placeholder="請輸入自訂特寫部位描述">
+                    <input type="text" id="customFocus" style="display:none;
+margin-top:8px;" placeholder="請輸入自訂特寫部位描述">
                 </div>
             </div>
 
@@ -252,28 +327,32 @@
                 </div>
             </div>
 
-            <div class="section" style="padding: 15px; margin-bottom: 15px; border-color: #30363d;">
+            <div class="section" style="padding: 15px;
+margin-bottom: 15px; border-color: #30363d;">
                 <label>特殊效果 (Special Effects)</label>
                 <div class="effects-grid">
                     <label class="effect-item" title="模擬真實光線在物體間的折射與反射，大幅增加真實感">
                         <input type="checkbox" class="effect-check" value="Ray Tracing Reflections"> 
-                        光線追蹤反射 (Ray Tracing) <br><span style="font-size:11px; color:#8b949e; margin-left:5px;">(模擬真實物理反光與折射)</span>
+                        光線追蹤反射 (Ray Tracing) <br><span style="font-size:11px; color:#8b949e;
+margin-left:5px;">(模擬真實物理反光與折射)</span>
                     </label>
                     <label class="effect-item"><input type="checkbox" class="effect-check" value="Realistic Sweat Sheen"> 真實汗水光澤 (Realistic Sweat Sheen)</label>
                     <label class="effect-item"><input type="checkbox" class="effect-check" value="Subtle Film Grain (3%)"> 微顆粒感 (Subtle Film Grain 3%)</label>
                     <label class="effect-item"><input type="checkbox" class="effect-check" value="Prism Flare"> 稜鏡光斑 (Prism Flare)</label>
                     </div>
-                <div class="help-text" style="margin-top:5px; color:#58a6ff;">* 系統已預設：高階肌膚物理 (SSS)、8K 解析度、無磨皮處理。</div>
+                <div class="help-text" style="margin-top:5px;
+color:#58a6ff;">* 系統已預設：高階肌膚物理 (SSS)、8K 解析度、無磨皮處理。</div>
             </div>
 
-            <div class="section" style="margin-bottom:0; padding-bottom:10px;">
+            <div class="section" style="margin-bottom:0;
+padding-bottom:10px;">
                 <h3>多重參考圖矩陣 (Gen)</h3>
                 <div id="genRefList"></div>
                 <button class="btn btn-tool" onclick="addRef('genRefList')">+ 新增參考圖</button>
             </div>
             
              <div class="section" style="margin-top: 20px;">
-                <label>🚫 負面提示詞 (Negative)</label>
+                 <label>🚫 負面提示詞 (Negative)</label>
                 <textarea id="pNeg" style="height: 50px;">Modified jawline, Crow's feet, Aged skin, Smooth plastic skin, CGI, Cartoonish, Blurry face, Distorted anatomy.</textarea>
             </div>
         </div>
@@ -282,14 +361,15 @@
     <div id="tab-edit" class="tab-content">
         <div class="section">
             <div class="row">
-                <div class="col"><label>改圖專案名稱</label><input type="text" id="eName" value="Edit_Project"></div>
+                 <div class="col"><label>改圖專案名稱</label><input type="text" id="eName" value="Edit_Project"></div>
             </div>
             
             <div class="preset-box">
                 <label style="color:var(--secondary)">🤖 背景置換/空間重構精靈 (Spatial Logic Wizard)</label>
                 <div class="row">
-                     <div class="col" style="flex:0.2;">
-                        <input type="checkbox" id="useBgPreset" onchange="toggleBgPreset()" style="width:20px; height:20px;">
+                    <div class="col" style="flex:0.2;">
+                        <input type="checkbox" id="useBgPreset" onchange="toggleBgPreset()" style="width:20px;
+height:20px;">
                     </div>
                     <div class="col" style="flex:2;">
                         <input type="text" id="bgRefId" placeholder="參考圖ID (例如: Scene_Rome)" disabled>
@@ -309,7 +389,7 @@
                     <label>整體改圖指令 (Instruction)</label>
                     <textarea id="eInstruction" style="height: 80px;" placeholder="例如：清除主角前方的所有遮蔽物，並重新整理空間邏輯..."></textarea>
                 </div>
-            </div>
+             </div>
         </div>
 
         <div class="section">
@@ -320,7 +400,7 @@
 
         <div class="section">
             <h3>空間邏輯 (Spatial Logic)</h3>
-            <div id="spatialList"></div>
+             <div id="spatialList"></div>
             <button class="btn btn-tool" onclick="addSpatialItem()">+ 新增空間邏輯</button>
         </div>
 
@@ -338,21 +418,22 @@
 
     <div class="row" style="margin-top:20px;">
         <div class="col"><button class="btn btn-gen" onclick="generateLocal()">預覽本地 JSON</button></div>
-        <div class="col"><button class="btn btn-api" onclick="runAI()">2. 呼叫 Gemini 轉譯</button></div>
+        <div class="col"><button class="btn btn-api" onclick="runAI()">2.
+呼叫 Gemini 轉譯</button></div>
     </div>
 
     <pre id="output">等待指令...</pre>
     
-    <div style="display:flex; gap:10px;">
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <button class="btn btn-tool" onclick="copyText()">📋 複製</button>
         <button class="btn btn-tool" onclick="saveFile()">💾 儲存</button>
         <button class="btn btn-tool" onclick="document.getElementById('loadInput').click()">📂 讀取</button>
-        <input type="file" id="loadInput" class="hidden" style="display:none;" onchange="loadFile(event)">
+        <input type="file" id="loadInput" class="hidden" style="display:none;"
+onchange="loadFile(event)">
     </div>
 
     <script>
         let currentTab = 'gen';
-        
         // --- Data Definitions ---
         const THEME_DATA = {
             "Noir": { h: "#F8F4E3", s: "#111016", a: "#FFB000", t: "35° ~ 50° Warm" },
@@ -362,7 +443,6 @@
             "Prism": { h: "#8E8E8E", s: "#000000", a: "#FF00FF", t: "Dynamic" },
             "Autumnal Ember Palette": { h: "#E65D00", s: "#9B0000", a: "#F9A602", t: "Dominantly warm color temperature (3500K - 5000K)" }
         };
-
         const LIGHTING_DATA = {
             "narrow_beam": {
                 name: "戲劇窄光 (Narrow Beam)",
@@ -407,7 +487,6 @@
                 description: "自然環境夕陽光"
             }
         };
-
         // --- Init ---
         function init() {
             refreshKeyList();
@@ -433,7 +512,8 @@
             for(let name in saved) {
                 const opt = document.createElement('option');
                 opt.value = saved[name]; // Store the KEY in value
-                opt.text = name;         // Store the NAME in text
+                opt.text = name;
+                // Store the NAME in text
                 select.appendChild(opt);
             }
         }
@@ -487,7 +567,8 @@
                     document.getElementById('statusDot').className = 'status-dot status-ok';
                     document.getElementById('statusMsg').innerHTML = '<span class="status-dot status-ok"></span> 模型已就緒';
                 } else { throw new Error("No models"); }
-            } catch (e) { alert('掃描失敗'); select.innerHTML = '<option value="">掃描失敗</option>'; }
+            } catch (e) { alert('掃描失敗');
+                select.innerHTML = '<option value="">掃描失敗</option>'; }
         }
 
         // --- Lighting & Theme Logic ---
@@ -506,19 +587,20 @@
             panel.style.display = key ? 'block' : 'none';
             if(!key) return;
             const cfg = LIGHTING_DATA[key];
-            
             const angleInput = document.getElementById('lAngle');
             const widthInput = document.getElementById('lWidth');
             const contrastSel = document.getElementById('lContrast');
             const targetSel = document.getElementById('lTarget');
-
             // Angle & Width
             if (cfg.default_angle === null && cfg.default_width === null) {
-                angleInput.value = ''; widthInput.value = ''; // Always reset if not applicable
-                angleInput.placeholder = '— 不適用 —'; widthInput.placeholder = '— 不適用 —';
+                angleInput.value = '';
+                widthInput.value = ''; // Always reset if not applicable
+                angleInput.placeholder = '— 不適用 —';
+                widthInput.placeholder = '— 不適用 —';
                 angleInput.disabled = true; widthInput.disabled = true;
             } else {
-                angleInput.disabled = false; widthInput.disabled = false;
+                angleInput.disabled = false;
+                widthInput.disabled = false;
                 angleInput.placeholder = ''; widthInput.placeholder = '';
                 // Logic V14.23: Fixed to always set default when switching preset
                 angleInput.value = cfg.default_angle;
@@ -577,6 +659,7 @@
         }
 
         // --- Dynamic Lists ---
+        // V14.25 Update: Added "Integration/Texture" to select options implicitly by creating it dynamically
         function addRef(targetId, id="", type="Auxiliary", weight=0.8, age="N/A", note="") {
             const div = document.createElement('div');
             div.className = 'dynamic-item';
@@ -588,8 +671,9 @@
                         <option value="Main Identity" ${type==="Main Identity"?'selected':''}>主身分</option>
                         <option value="Style/Hair" ${type==="Style/Hair"?'selected':''}>髮型/風格</option>
                         <option value="Expression" ${type==="Expression"?'selected':''}>表情參考</option>
-                        <option value="Auxiliary" ${type==="Auxiliary"?'selected':''}>輔助物件</option>
-                    </select></div>
+                        <option value="Auxiliary" ${type==="Auxiliary"?'selected':''}>輔助物件 (Outfit/Acc)</option>
+                        <option value="Integration/Texture" ${type==="Integration/Texture"?'selected':''}>材質整合 (Texture)</option>
+                     </select></div>
                     <div class="col"><label>權重</label><input type="number" class="r-weight" value="${weight}" step="0.1"></div>
                     <div class="col"><label>年齡</label><input type="text" class="r-age" value="${age}"></div>
                 </div>
@@ -626,7 +710,8 @@
                 <button class="btn-remove" onclick="this.parentElement.remove()">✕</button>
                 <div class="row">
                     <div class="col" style="flex:1;"><input type="text" class="${targetId === 'modList' ? 'm-key' : 's-key'}" placeholder="${phKey}" value="${key}"></div>
-                    <div class="col" style="flex:3;"><textarea class="${targetId === 'modList' ? 'm-val' : 's-val'}" style="height:60px;" placeholder="${phVal}">${val}</textarea></div>
+                    <div class="col" style="flex:3;"><textarea class="${targetId === 'modList' ? 'm-val' 
+: 's-val'}" style="height:60px;" placeholder="${phVal}">${val}</textarea></div>
                 </div>
             `;
             document.getElementById(targetId).appendChild(div);
@@ -641,7 +726,6 @@
                 age: i.querySelector('.r-age').value,
                 note: i.querySelector('.r-note').value
             }));
-
             let mainAge = "25";
             const mainRef = refs.find(r => r.type === "Main Identity");
             if(mainRef && mainRef.age) mainAge = mainRef.age.replace(/\D/g, '') || "25";
@@ -649,27 +733,41 @@
             const effects = Array.from(document.querySelectorAll('.effect-check:checked')).map(c => c.value);
             // V14.24: Ensure 8K is pushed if not present (logic maintained)
             if(!effects.includes("8K Resolution")) effects.push("8K Resolution");
-
             let closeupTarget = document.getElementById('pCloseupOther').value;
             if (closeupTarget === 'Custom') closeupTarget = document.getElementById('customFocus').value;
-
             // V14.24: Collect Aspect Ratio
             let aspectRatio = document.getElementById('pAspectRatio').value;
             if(aspectRatio === 'Custom') aspectRatio = document.getElementById('pAspectRatioCustom').value;
 
+            // V14.25: Tech Params Logic & Physics Injection
+            let technical_params = {
+                "aspect_ratio": aspectRatio,
+                "resolution": "8K Ultra-HD",
+                "focus": "Optical-grade sharpness on the eyes and skin pores",
+                "detail_level": "Hyper-realistic skin physics and fabric weave texture"
+            };
+
+            let negPrompt = document.getElementById('pNeg').value;
+
+            // V14.25 Logic: Check for Outfit/Accessories to inject Physics and Anti-Floating Prompts
+            const hasAccessories = refs.some(r => r.type === 'Auxiliary' || r.type === 'Integration/Texture');
+            if (hasAccessories) {
+                technical_params["ambient_occlusion"] = "Deep micro-shadows at the contact points between fabric and skin to ensure grounding";
+                technical_params["cloth_physics"] = "Gravitational draping and realistic fabric tension";
+                // Add specific negative prompts from EXAMPLE
+                const extraNegs = ", floating accessories, flat lighting on fabric, missing contact shadows, synthetic fabric sheen, plastic-looking hat trim, sharp edges between hat and hair, 2D overlay appearance";
+                if(!negPrompt.includes("floating accessories")) negPrompt += extraNegs;
+            }
+
             return {
                 project: document.getElementById('pName').value,
                 photogenic_mode: document.getElementById('isPhotogenic').checked,
-                // V14.24: Expose Technical Parameters & Skin Physics to ROOT
-                technical_parameters: {
-                    "aspect_ratio": aspectRatio,
-                    "resolution": "8K Ultra-HD",
-                    "focus": "Optical-grade sharpness on the eyes and skin pores",
-                    "detail_level": "Hyper-realistic skin physics and fabric weave texture"
-                },
+                // V14.25: Injected dynamically
+                technical_parameters: technical_params,
                 skin_physics: {
                      "age_spec": `${mainAge} years old`,
-                     "face_logic": `Youthful ${mainAge}yo facial structure. High collagen density. Natural skin movement with zero permanent aging lines.`,
+                     "face_logic": `Youthful ${mainAge}yo facial structure.
+High collagen density. Natural skin movement with zero permanent aging lines.`,
                      "skin_surface": {
                         "pore_variation": "Non-uniform pore variation (T-zone vs cheeks). No synthetic smoothing.",
                         "subsurface_scattering": "High SSS effect visible in highlights, creating a warm, living glow through the dermis.",
@@ -684,6 +782,11 @@
                     shot_scale_lens: document.getElementById('pShot').value,
                     closeup_focus: closeupTarget,
                     angle: document.getElementById('pAngle').value,
+                    // V14.25: Depth of Field
+                    depth_of_field: {
+                        setting: document.getElementById('pDoF').value,
+                        target: document.getElementById('pFocusTarget').value
+                    },
                     lighting: {
                         preset: document.getElementById('pLight').value,
                         angle: document.getElementById('lAngle').value,
@@ -703,7 +806,7 @@
                     special_effects: effects
                 },
                 reference_matrix: refs,
-                negative: document.getElementById('pNeg').value
+                negative: negPrompt
             };
         }
 
@@ -715,7 +818,6 @@
                 age: i.querySelector('.r-age').value,
                 note: i.querySelector('.r-note').value
             }));
-
             const mods = {};
             document.querySelectorAll('#modList .dynamic-item').forEach(i => {
                 const k = i.querySelector('.m-key').value.trim();
@@ -726,9 +828,9 @@
                 const k = i.querySelector('.s-key').value.trim();
                 if(k) spatial[k] = i.querySelector('.s-val').value;
             });
-            
             if (document.getElementById('useBgPreset').checked) {
-                const refId = document.getElementById('bgRefId').value || "[REFERENCE_ID]";
+                const refId = document.getElementById('bgRefId').value ||
+"[REFERENCE_ID]";
                 const lightingOpt = document.getElementById('bgLightOpt').value;
                 mods["subject_preservation"] = "Keep facial identity, expression, pose, and clothing exactly as is.";
                 mods["scene_reconstruction"] = `Replace background entirely using ${refId} as reference.`;
@@ -743,7 +845,8 @@
             const negs = document.getElementById('eNeg').value.split(/,|\n/).map(s => s.trim()).filter(s => s);
             let instruction = document.getElementById('eInstruction').value;
             if(document.getElementById('useBgPreset').checked && !instruction) {
-                const refId = document.getElementById('bgRefId').value || "[REFERENCE_ID]";
+                const refId = document.getElementById('bgRefId').value ||
+"[REFERENCE_ID]";
                 instruction = `Recreate the primary image by replacing the background entirely with ${refId}, while STRICTLY preserving the subject's identity.`;
             }
 
@@ -758,7 +861,8 @@
         }
 
         function generateLocal() { 
-            const data = currentTab === 'gen' ? getGenData() : getEditData();
+            const data = currentTab === 'gen' ?
+getGenData() : getEditData();
             document.getElementById('output').textContent = JSON.stringify(data, null, 2);
         }
 
@@ -771,30 +875,31 @@
             
             let prompt = "";
             let inputData = {};
-            
             if (currentTab === 'gen') {
                 inputData = getGenData();
-                prompt = `You are a master photography prompt engineer. Translate inputs to pro English. 
-                Focus heavily on the 'lighting' object details (angle, width, contrast ratio) and 'theme_color' hex codes.
+                prompt = `You are a master photography prompt engineer. Translate inputs to pro English.
+Focus heavily on the 'lighting' object details (angle, width, contrast ratio) and 'theme_color' hex codes.
                 Input JSON: ${JSON.stringify(inputData)}.
-                Output ONLY valid JSON structure matching input but enriched.`;
+Output ONLY valid JSON structure matching input but enriched.`;
             } else {
                 inputData = getEditData();
                 prompt = `You are an AI image editing specialist. Transform the user input into a strict JSON format for image modification.
-                Rules: 1. Expand 'modifications' and 'spatial_logic' values into highly detailed, technical photography instructions.
-                2. Keep the output JSON structure identical to the input. Input Data: ${JSON.stringify(inputData)}`;
+Rules: 1. Expand 'modifications' and 'spatial_logic' values into highly detailed, technical photography instructions.
+2. Keep the output JSON structure identical to the input. Input Data: ${JSON.stringify(inputData)}`;
             }
 
             try {
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({contents: [{parts: [{text: prompt}]}]})
+                    body: JSON.stringify({contents: [{parts: 
+[{text: prompt}]}]})
                 });
                 const data = await res.json();
                 let text = data.candidates[0].content.parts[0].text;
                 document.getElementById('output').textContent = text.replace(/```json|```/gi, '').trim();
-            } catch (e) { document.getElementById('output').textContent = "連線失敗: " + e; }
+            } catch (e) { document.getElementById('output').textContent = "連線失敗: " + e;
+            }
         }
 
         function saveFile() {
@@ -812,7 +917,6 @@
             reader.onload = (event) => {
                 try {
                     const json = JSON.parse(event.target.result);
-                    
                     if (json.instruction) {
                         switchTab('edit');
                         document.getElementById('eName').value = json.project || "Edit_Project";
@@ -823,12 +927,10 @@
                         if(json.modifications) Object.entries(json.modifications).forEach(([k, v]) => {
                             if(k !== "subject_preservation" && k !== "scene_reconstruction") addModItem(k, v);
                         });
-                        
                         document.getElementById('spatialList').innerHTML = "";
                         if(json.spatial_logic) Object.entries(json.spatial_logic).forEach(([k, v]) => {
                              if(k !== "depth_separation" && k !== "lighting_harmonization") addSpatialItem(k, v);
                         });
-
                         const matrix = json.reference_matrix || [];
                         document.getElementById('editRefList').innerHTML = "";
                         if(Array.isArray(matrix)) {
@@ -849,7 +951,6 @@
                             const arSelect = document.getElementById('pAspectRatio');
                             const arCustom = document.getElementById('pAspectRatioCustom');
                             const known = ["9:16", "4:5", "1:1", "16:9", "5:4"];
-                            
                             if (known.includes(ar)) {
                                 arSelect.value = ar;
                                 arCustom.style.display = 'none';
@@ -868,9 +969,16 @@
                             document.getElementById('pExpression').value = p.expression || "";
                             document.getElementById('pMood').value = p.mood_atmosphere || "";
 
+                            // V14.25 Restore DoF
+                            if(p.depth_of_field) {
+                                document.getElementById('pDoF').value = p.depth_of_field.setting || "Shallow Depth of Field";
+                                document.getElementById('pFocusTarget').value = p.depth_of_field.target || "Focus on Subject";
+                            }
+
                             // Lighting
                             if(p.lighting) {
-                                document.getElementById('pLight').value = p.lighting.preset || "";
+                                document.getElementById('pLight').value = p.lighting.preset ||
+"";
                                 updateLightPanel(); 
                                 if(p.lighting.angle) document.getElementById('lAngle').value = p.lighting.angle;
                                 if(p.lighting.width) document.getElementById('lWidth').value = p.lighting.width;
@@ -880,7 +988,8 @@
 
                             // Theme
                             if(p.theme_color) {
-                                document.getElementById('pTheme').value = p.theme_color.preset || "";
+                                document.getElementById('pTheme').value = p.theme_color.preset ||
+"";
                                 updateThemePanel();
                                 if(p.theme_color.highlight) { 
                                     document.getElementById('tHighlight').value = p.theme_color.highlight;
@@ -898,11 +1007,11 @@
                             }
 
                             // Closeup
-                            const savedCloseup = p.closeup_focus || "";
+                            const savedCloseup = p.closeup_focus ||
+"";
                             const select = document.getElementById('pCloseupOther');
                             const otherInput = document.getElementById('customFocus');
                             const options = Array.from(select.options).map(o => o.value);
-                            
                             if(options.includes(savedCloseup)) {
                                 select.value = savedCloseup;
                                 otherInput.style.display = 'none';
@@ -911,20 +1020,22 @@
                                 otherInput.value = savedCloseup;
                                 otherInput.style.display = 'block';
                             } else {
-                                select.value = "Eyes"; // Default fallback
+                                select.value = "Eyes";
+                                // Default fallback
                                 otherInput.style.display = 'none';
                             }
                             checkCloseup();
-
                             // Effects
-                            const savedEffects = p.special_effects || [];
+                            const savedEffects = p.special_effects ||
+[];
                             document.querySelectorAll('.effect-check').forEach(cb => {
                                 cb.checked = savedEffects.includes(cb.value);
                             });
                         }
 
                         // References (Gen)
-                        const matrix = json.reference_matrix || [];
+                        const matrix = json.reference_matrix ||
+[];
                         document.getElementById('genRefList').innerHTML = "";
                         if(Array.isArray(matrix)) {
                             matrix.forEach(r => addRef('genRefList', r.id, r.type, r.weight, r.age, r.note));
@@ -934,7 +1045,7 @@
                     document.getElementById('output').textContent = JSON.stringify(json, null, 2);
                     alert('讀取成功，UI 與設定已還原。');
                 } catch(ex) { 
-                    alert('檔案格式錯誤或損毀: ' + ex); 
+                    alert('檔案格式錯誤或損毀: ' + ex);
                 }
             };
             reader.readAsText(e.target.files[0]);
